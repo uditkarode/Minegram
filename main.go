@@ -181,12 +181,6 @@ func main(){
 				}
 			} else if deathRegex.MatchString(m) {
 				result := strings.Split(m, " ")
-				fmt.Println(result[0])
-				fmt.Println(result[1])
-				fmt.Println(result[2])
-				fmt.Println(result[3])
-				fmt.Println(result[4])
-				fmt.Println(result[5])
 				_, _ = b.Send(targetChat, "`" + result[3] + "` " + strings.Join(result[4:], " ") + ".", "Markdown")
 			}
 		}
