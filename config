@@ -1,0 +1,3 @@
+command = java -Xms1024M -Xms 1024M -jar server.jar
+bot_token = SSF9s4FwhateverS82SD94:23847824
+target_chat = -1001251355942
