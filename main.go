@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -22,17 +23,28 @@ func (g Group) Recipient() string {
 	return g.id
 }
 
+func remove(s []string, r string) []string {
+	for i, v := range s {
+		if v == r {
+			return append(s[:i], s[i+1:]...)
+		}
+	}
+	return s
+}
+
 func main() {
 	res := readConfig("config")
+
+	online := []string{}
 
 	cmd := res["command"]
 	tok := res["bot_token"]
 	tchat := res["target_chat"]
 
-	chatRegex := regexp.MustCompile(`<(.+)> (.+)`)
-	joinRegex := regexp.MustCompile(".* (.+) joined the game")
-	leaveRegex := regexp.MustCompile(".* (.+) left the game")
-	advancementRegex := regexp.MustCompile(".* (.+) has made the advancement (.+)")
+	chatRegex := regexp.MustCompile(`: <(.+)> (.+)`)
+	joinRegex := regexp.MustCompile(`.* (.+) joined the game`)
+	leaveRegex := regexp.MustCompile(`.* (.+) left the game`)
+	advancementRegex := regexp.MustCompile(`.* (.+) has made the advancement (.+)`)
 	/* death regex taken from https://github.com/trgwii/TeMiCross/blob/master/client/parser/default/messages/death.js */
 	deathRegex := regexp.MustCompile(`(.+) (was (shot by .+|shot off (some vines|a ladder) by .+|pricked to death|stabbed to death|squished too much|blown up by .+|killed by .+|doomed to fall by .+|blown from a high place by .+|squashed by .+|burnt to a crisp whilst fighting .+|roasted in dragon breath( by .+)?|struck by lightning( whilst fighting .+)?|slain by .+|fireballed by .+|killed trying to hurt .+|impaled by .+|speared by .+|poked to death by a sweet berry bush( whilst trying to escape .+)?|pummeled by .+)|hugged a cactus|walked into a cactus whilst trying to escape .+|drowned( whilst trying to escape .+)?|suffocated in a wall( whilst fighting .+)?|experienced kinetic energy( whilst trying to escape .+)?|removed an elytra while flying( whilst trying to escape .+)?|blew up|hit the ground too hard( whilst trying to escape .+)?|went up in flames|burned to death|walked into fire whilst fighting .+|went off with a bang( whilst fighting .+)?|tried to swim in lava(( while trying)? to escape .+)?|discovered floor was lava|walked into danger zone due to .+|got finished off by .+|starved to death|didn't want to live in the same world as .+|withered away( whilst fighting .+)?|died( because of .+)?|fell (from a high place( and fell out of the world)?|off a ladder|off to death( whilst fighting .+)?|off some vines|out of the water|into a patch of fire|into a patch of cacti|too far and was finished by .+|out of the world))$`)
 
@@ -94,6 +106,21 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	b.Handle("/list", func(m *tb.Message) {
+		onlen := len(online)
+		res := "`" + strconv.Itoa(onlen)
+		if onlen == 1 {
+			res = res + "` player online\n"
+		} else {
+			res = res + "` players online\n"
+		}
+
+		for _, player := range online {
+			res += "\n- `" + player + "`"
+		}
+		_, _ = b.Send(targetChat, res, "Markdown")
+	})
 
 	b.Handle(tb.OnText, func(m *tb.Message) {
 		sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
@@ -175,11 +202,13 @@ func main() {
 			} else if joinRegex.MatchString(m) {
 				result := joinRegex.FindStringSubmatch(m)
 				if len(result) == 2 {
+					online = append(online, result[1])
 					_, _ = b.Send(targetChat, "`"+result[1]+"`"+" joined the server.", "Markdown")
 				}
 			} else if leaveRegex.MatchString(m) {
 				result := leaveRegex.FindStringSubmatch(m)
 				if len(result) == 2 {
+					online = remove(online, result[1])
 					_, _ = b.Send(targetChat, "`"+result[1]+"`"+" has left the server.", "Markdown")
 				}
 			} else if advancementRegex.MatchString(m) {
