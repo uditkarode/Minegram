@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -15,23 +14,7 @@ import (
 )
 
 var child *gexpect.ExpectSubprocess
-
-type group struct {
-	id string
-}
-
-func (g group) Recipient() string {
-	return g.id
-}
-
-func remove(s []string, r string) []string {
-	for i, v := range s {
-		if v == r {
-			return append(s[:i], s[i+1:]...)
-		}
-	}
-	return s
-}
+var lastLine = make(chan string)
 
 func main() {
 	res := readConfig("config")
@@ -41,13 +24,6 @@ func main() {
 	cmd := res["command"]
 	tok := res["bot_token"]
 	tchat := res["target_chat"]
-
-	chatRegex := regexp.MustCompile(`: <(.+)> (.+)`)
-	joinRegex := regexp.MustCompile(`.* (.+) joined the game`)
-	leaveRegex := regexp.MustCompile(`.* (.+) left the game`)
-	advancementRegex := regexp.MustCompile(`.* (.+) has made the advancement (.+)`)
-	/* death regex taken from https://github.com/trgwii/TeMiCross/blob/master/client/parser/default/messages/death.js */
-	deathRegex := regexp.MustCompile(`(.+) (was (shot by .+|shot off (some vines|a ladder) by .+|pricked to death|stabbed to death|squished too much|blown up by .+|killed by .+|doomed to fall by .+|blown from a high place by .+|squashed by .+|burnt to a crisp whilst fighting .+|roasted in dragon breath( by .+)?|struck by lightning( whilst fighting .+)?|slain by .+|fireballed by .+|killed trying to hurt .+|impaled by .+|speared by .+|poked to death by a sweet berry bush( whilst trying to escape .+)?|pummeled by .+)|hugged a cactus|walked into a cactus whilst trying to escape .+|drowned( whilst trying to escape .+)?|suffocated in a wall( whilst fighting .+)?|experienced kinetic energy( whilst trying to escape .+)?|removed an elytra while flying( whilst trying to escape .+)?|blew up|hit the ground too hard( whilst trying to escape .+)?|went up in flames|burned to death|walked into fire whilst fighting .+|went off with a bang( whilst fighting .+)?|tried to swim in lava(( while trying)? to escape .+)?|discovered floor was lava|walked into danger zone due to .+|got finished off by .+|starved to death|didn't want to live in the same world as .+|withered away( whilst fighting .+)?|died( because of .+)?|fell (from a high place( and fell out of the world)?|off a ladder|off to death( whilst fighting .+)?|off some vines|out of the water|into a patch of fire|into a patch of cacti|too far and was finished by .+|out of the world))$`)
 
 	if cmd == "" {
 		fmt.Println("Please enter a 'command' in the config!")
@@ -81,7 +57,7 @@ func main() {
 	go func() {
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
-			child.SendLine(scanner.Text())
+			child.Send(scanner.Text() + "\n")
 		}
 	}()
 
@@ -100,13 +76,20 @@ func main() {
 		_, _ = b.Send(targetChat, res, "Markdown")
 	})
 
+	b.Handle("/time", func(m *tb.Message) {
+		output := cliExec("/time query daytime")
+		result := timeRegex.FindStringSubmatch(output)
+		if len(result) == 2 {
+			_, _ = b.Send(targetChat, result[1], "Markdown")
+		}
+	})
+
 	b.Handle(tb.OnText, func(m *tb.Message) {
 		if len(online) > 0 {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := strings.ReplaceAll(m.Text, "\n", "(nl)")
 			if m.IsReply() {
 				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" " + content + "\"}]\n")
-
 			} else {
 				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": " + content + "\",\"color\":\"white\"}]\n")
 			}
@@ -175,13 +158,12 @@ func main() {
 	}()
 
 	for {
-		m, err := child.ReadLine()
-
-		if err != nil {
-			panic(err)
-		}
+		m, _ := child.ReadLine()
 
 		fmt.Println(m)
+
+		go func() { lastLine <- m }()
+
 		if strings.Contains(m, "INFO") {
 			if chatRegex.MatchString(m) {
 				result := chatRegex.FindStringSubmatch(m)
