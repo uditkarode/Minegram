@@ -77,7 +77,7 @@ func main() {
 	})
 
 	b.Handle("/time", func(m *tb.Message) {
-		output := cliExec("/time query daytime")
+		output := cliExec("time query daytime")
 		result := timeRegex.FindStringSubmatch(output)
 		if len(result) == 2 {
 			_, _ = b.Send(targetChat, result[1], "Markdown")
@@ -89,9 +89,9 @@ func main() {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := strings.ReplaceAll(m.Text, "\n", "(nl)")
 			if m.IsReply() {
-				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" " + content + "\"}]\n")
+				child.Send("tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" " + content + "\"}]\n")
 			} else {
-				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": " + content + "\",\"color\":\"white\"}]\n")
+				child.Send("tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": " + content + "\",\"color\":\"white\"}]\n")
 			}
 		}
 	})
@@ -101,9 +101,9 @@ func main() {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := "[STICKER]"
 			if m.IsReply() {
-				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" " + content + "\"}]\n")
+				child.Send("tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" " + content + "\"}]\n")
 			} else {
-				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": " + content + "\",\"color\":\"yellow\"}]\n")
+				child.Send("tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": " + content + "\",\"color\":\"yellow\"}]\n")
 			}
 		}
 	})
@@ -113,9 +113,9 @@ func main() {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := "[PHOTO]"
 			if m.IsReply() {
-				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" " + content + "\"}]\n")
+				child.Send("tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" " + content + "\"}]\n")
 			} else {
-				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": " + content + "\",\"color\":\"yellow\"}]\n")
+				child.Send("tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": " + content + "\",\"color\":\"yellow\"}]\n")
 			}
 		}
 	})
@@ -125,9 +125,9 @@ func main() {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := "[VIDEO]"
 			if m.IsReply() {
-				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" " + content + "\"}]\n")
+				child.Send("tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" " + content + "\"}]\n")
 			} else {
-				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": " + content + "\",\"color\":\"yellow\"}]\n")
+				child.Send("tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": " + content + "\",\"color\":\"yellow\"}]\n")
 			}
 		}
 	})
@@ -137,9 +137,9 @@ func main() {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := "[VOICE]"
 			if m.IsReply() {
-				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" " + content + "\"}]\n")
+				child.Send("tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" " + content + "\"}]\n")
 			} else {
-				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": " + content + "\",\"color\":\"yellow\"}]\n")
+				child.Send("tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": " + content + "\",\"color\":\"yellow\"}]\n")
 			}
 		}
 	})
