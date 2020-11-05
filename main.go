@@ -3,23 +3,24 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"os"
-	"os/exec"
+	"os/signal"
 	"regexp"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 
+	"github.com/ThomasRooney/gexpect"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-type Group struct {
+var child *gexpect.ExpectSubprocess
+
+type group struct {
 	id string
 }
 
-func (g Group) Recipient() string {
+func (g group) Recipient() string {
 	return g.id
 }
 
@@ -64,7 +65,7 @@ func main() {
 	}
 
 	var targetChat tb.Recipient
-	targetChat = Group{id: tchat}
+	targetChat = group{id: tchat}
 
 	b, errz := tb.NewBot(tb.Settings{
 		Token:  tok,
@@ -75,37 +76,14 @@ func main() {
 		panic(errz)
 	}
 
-	splitCmd := strings.Split(cmd, " ")
-
-	execCmd := exec.Command(splitCmd[0], splitCmd[1:]...)
-	execCmd.Stderr = os.Stderr
-
-	stdin, err := execCmd.StdinPipe()
-	if err != nil {
-		panic(err)
-	}
-
-	stdout, err := execCmd.StdoutPipe()
-	if err != nil {
-		panic(err)
-	}
-
-	execCmd.SysProcAttr = &syscall.SysProcAttr{
-		Pdeathsig: syscall.SIGTERM,
-	}
+	child, _ = gexpect.Spawn(cmd)
 
 	go func() {
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
-			io.WriteString(stdin, scanner.Text()+"\n")
+			child.SendLine(scanner.Text())
 		}
 	}()
-
-	err = execCmd.Start()
-
-	if err != nil {
-		panic(err)
-	}
 
 	b.Handle("/list", func(m *tb.Message) {
 		onlen := len(online)
@@ -127,12 +105,10 @@ func main() {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := strings.ReplaceAll(m.Text, "\n", "(nl)")
 			if m.IsReply() {
-				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
+				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" " + content + "\"}]\n")
+
 			} else {
-				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"white\"}]\n")
-			}
-			if err != nil {
-				fmt.Println("ERR> ", err)
+				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": " + content + "\",\"color\":\"white\"}]\n")
 			}
 		}
 	})
@@ -142,12 +118,9 @@ func main() {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := "[STICKER]"
 			if m.IsReply() {
-				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
+				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" " + content + "\"}]\n")
 			} else {
-				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"yellow\"}]\n")
-			}
-			if err != nil {
-				fmt.Println("ERR> ", err)
+				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": " + content + "\",\"color\":\"yellow\"}]\n")
 			}
 		}
 	})
@@ -157,12 +130,9 @@ func main() {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := "[PHOTO]"
 			if m.IsReply() {
-				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
+				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" " + content + "\"}]\n")
 			} else {
-				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"yellow\"}]\n")
-			}
-			if err != nil {
-				fmt.Println("ERR> ", err)
+				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": " + content + "\",\"color\":\"yellow\"}]\n")
 			}
 		}
 	})
@@ -172,12 +142,9 @@ func main() {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := "[VIDEO]"
 			if m.IsReply() {
-				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
+				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" " + content + "\"}]\n")
 			} else {
-				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"yellow\"}]\n")
-			}
-			if err != nil {
-				fmt.Println("ERR> ", err)
+				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": " + content + "\",\"color\":\"yellow\"}]\n")
 			}
 		}
 	})
@@ -187,21 +154,33 @@ func main() {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := "[VOICE]"
 			if m.IsReply() {
-				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
+				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" " + content + "\"}]\n")
 			} else {
-				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"yellow\"}]\n")
-			}
-			if err != nil {
-				fmt.Println("ERR> ", err)
+				child.Send("/tellraw @a [\"\",{\"text\":\"[TG] " + sender + "\",\"color\":\"aqua\"},{\"text\":\": " + content + "\",\"color\":\"yellow\"}]\n")
 			}
 		}
 	})
 
 	go b.Start()
 
-	scanner := bufio.NewScanner(stdout)
-	for scanner.Scan() {
-		m := scanner.Text()
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for range c {
+			fmt.Println("\n********************\nRunning cleanup! Please wait...\n********************")
+			child.Cmd.Process.Signal(os.Interrupt)
+			child.Wait()
+			os.Exit(0)
+		}
+	}()
+
+	for {
+		m, err := child.ReadLine()
+
+		if err != nil {
+			panic(err)
+		}
+
 		fmt.Println(m)
 		if strings.Contains(m, "INFO") {
 			if chatRegex.MatchString(m) {
@@ -232,6 +211,4 @@ func main() {
 			}
 		}
 	}
-
-	_ = execCmd.Wait()
 }
