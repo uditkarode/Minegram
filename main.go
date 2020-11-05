@@ -123,67 +123,77 @@ func main() {
 	})
 
 	b.Handle(tb.OnText, func(m *tb.Message) {
-		sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
-		content := strings.ReplaceAll(m.Text, "\n", "(nl)")
-		if m.IsReply() {
-			_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
-		} else {
-			_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"white\"}]\n")
-		}
-		if err != nil {
-			fmt.Println("ERR> ", err)
+		if len(online) > 0 {
+			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
+			content := strings.ReplaceAll(m.Text, "\n", "(nl)")
+			if m.IsReply() {
+				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
+			} else {
+				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"white\"}]\n")
+			}
+			if err != nil {
+				fmt.Println("ERR> ", err)
+			}
 		}
 	})
 
 	b.Handle(tb.OnSticker, func(m *tb.Message) {
-		sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
-		content := "[STICKER]"
-		if m.IsReply() {
-			_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
-		} else {
-			_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"yellow\"}]\n")
-		}
-		if err != nil {
-			fmt.Println("ERR> ", err)
+		if len(online) > 0 {
+			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
+			content := "[STICKER]"
+			if m.IsReply() {
+				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
+			} else {
+				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"yellow\"}]\n")
+			}
+			if err != nil {
+				fmt.Println("ERR> ", err)
+			}
 		}
 	})
 
 	b.Handle(tb.OnPhoto, func(m *tb.Message) {
-		sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
-		content := "[PHOTO]"
-		if m.IsReply() {
-			_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
-		} else {
-			_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"yellow\"}]\n")
-		}
-		if err != nil {
-			fmt.Println("ERR> ", err)
+		if len(online) > 0 {
+			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
+			content := "[PHOTO]"
+			if m.IsReply() {
+				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
+			} else {
+				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"yellow\"}]\n")
+			}
+			if err != nil {
+				fmt.Println("ERR> ", err)
+			}
 		}
 	})
 
 	b.Handle(tb.OnVideo, func(m *tb.Message) {
-		sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
-		content := "[VIDEO]"
-		if m.IsReply() {
-			_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
-		} else {
-			_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"yellow\"}]\n")
-		}
-		if err != nil {
-			fmt.Println("ERR> ", err)
+		if len(online) > 0 {
+			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
+			content := "[VIDEO]"
+			if m.IsReply() {
+				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
+			} else {
+				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"yellow\"}]\n")
+			}
+			if err != nil {
+				fmt.Println("ERR> ", err)
+			}
 		}
 	})
 
 	b.Handle(tb.OnVoice, func(m *tb.Message) {
-		sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
-		content := "[VOICE]"
-		if m.IsReply() {
-			_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
-		} else {
-			_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"yellow\"}]\n")
-		}
-		if err != nil {
-			fmt.Println("ERR> ", err)
+		if len(online) > 0 {
+			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
+			content := "[VOICE]"
+			if m.IsReply() {
+				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
+			} else {
+				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"yellow\"}]\n")
+			}
+			if err != nil {
+				fmt.Println("ERR> ", err)
+			}
 		}
 	})
 
