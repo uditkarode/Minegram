@@ -31,7 +31,7 @@ func main() {
 		panic("failed to connect database")
 	}
 
-	db.AutoMigrate(&player{})
+	_ = db.AutoMigrate(&player{})
 
 	cmd := res["command"]
 	tok := res["bot_token"]
@@ -133,13 +133,13 @@ func main() {
 	b.Handle("/cli", func(m *tb.Message) {
 		if contains(admUsers, m.Sender.Username) {
 			if m.Payload == "" {
-				b.Reply(m, "Enter a command to execute!")
+				_, _ = b.Reply(m, "Enter a command to execute!")
 			} else {
 				output := cliExec(stdin, m.Payload)
-				b.Reply(m, "`"+output+"`", "Markdown")
+				_, _ = b.Reply(m, "`"+output+"`", "Markdown")
 			}
 		} else {
-			b.Reply(m, "You are not authorised to use this command!")
+			_, _ = b.Reply(m, "You are not authorised to use this command!")
 		}
 	})
 
@@ -208,8 +208,12 @@ func main() {
 		if len(online) > 0 {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := strings.ReplaceAll(m.Text, "\n", "(nl)")
+
 			if m.IsReply() {
-				_, err = io.WriteString(stdin, "tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
+				if m.ReplyTo.Text == "" {
+					m.ReplyTo.Text = "[unsupported]"
+				}
+				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\""+m.ReplyTo.Text+"\"}},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
 			} else {
 				_, err = io.WriteString(stdin, "tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"white\"}]\n")
 			}
@@ -221,7 +225,10 @@ func main() {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := "[STICKER]"
 			if m.IsReply() {
-				_, err = io.WriteString(stdin, "tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
+				if m.ReplyTo.Text == "" {
+					m.ReplyTo.Text = "[unsupported]"
+				}
+				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\""+m.ReplyTo.Text+"\"}},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
 			} else {
 				_, err = io.WriteString(stdin, "tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"yellow\"}]\n")
 			}
@@ -233,7 +240,10 @@ func main() {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := "[PHOTO]"
 			if m.IsReply() {
-				_, err = io.WriteString(stdin, "tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
+				if m.ReplyTo.Text == "" {
+					m.ReplyTo.Text = "[unsupported]"
+				}
+				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\""+m.ReplyTo.Text+"\"}},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
 			} else {
 				_, err = io.WriteString(stdin, "tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"yellow\"}]\n")
 			}
@@ -245,7 +255,10 @@ func main() {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := "[VIDEO]"
 			if m.IsReply() {
-				_, err = io.WriteString(stdin, "tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
+				if m.ReplyTo.Text == "" {
+					m.ReplyTo.Text = "[unsupported]"
+				}
+				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\""+m.ReplyTo.Text+"\"}},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
 			} else {
 				_, err = io.WriteString(stdin, "tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"yellow\"}]\n")
 			}
@@ -257,7 +270,10 @@ func main() {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := "[VOICE]"
 			if m.IsReply() {
-				_, err = io.WriteString(stdin, "tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\"},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
+				if m.ReplyTo.Text == "" {
+					m.ReplyTo.Text = "[unsupported]"
+				}
+				_, err = io.WriteString(stdin, "/tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\""+m.ReplyTo.Text+"\"}},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
 			} else {
 				_, err = io.WriteString(stdin, "tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"yellow\"}]\n")
 			}
@@ -271,8 +287,8 @@ func main() {
 	go func() {
 		for range c {
 			fmt.Println("\n********************\nRunning cleanup! Please wait...\n********************")
-			io.WriteString(stdin, "stop\n")
-			execCmd.Wait()
+			_, _ = io.WriteString(stdin, "stop\n")
+			_ = execCmd.Wait()
 			os.Exit(0)
 		}
 	}()
@@ -309,9 +325,9 @@ func main() {
 									dimensionStr := cliExec(stdin, "data get entity "+user+" Dimension")
 									dimension := dimensionRegex.FindStringSubmatch(dimensionStr)
 
-									io.WriteString(stdin, "effect give "+user+" minecraft:blindness 999999\n")
-									io.WriteString(stdin, "gamemode spectator "+user+"\n")
-									io.WriteString(stdin, "tellraw "+user+" [\"\",{\"text\":\"If you haven't linked before, send \"},{\"text\":\"/link "+newPlayer.inGameName+" \",\"color\":\"green\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"},{\"text\":\"\\nIf you have \"},{\"text\":\"linked \",\"color\":\"green\"},{\"text\":\"your account, send \"},{\"text\":\"/auth \",\"color\":\"aqua\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"}]\n")
+									_, _ = io.WriteString(stdin, "effect give "+user+" minecraft:blindness 999999\n")
+									_, _ = io.WriteString(stdin, "gamemode spectator "+user+"\n")
+									_, _ = io.WriteString(stdin, "tellraw "+user+" [\"\",{\"text\":\"If you haven't linked before, send \"},{\"text\":\"/link "+newPlayer.inGameName+" \",\"color\":\"green\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"},{\"text\":\"\\nIf you have \"},{\"text\":\"linked \",\"color\":\"green\"},{\"text\":\"your account, send \"},{\"text\":\"/auth \",\"color\":\"aqua\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"}]\n")
 
 									if len(coords) == 4 {
 										if len(dimension) == 2 {
@@ -322,7 +338,7 @@ func main() {
 													break
 												} else {
 													command := "execute in " + dimension[1] + " run tp " + user + " " + strings.ReplaceAll(coords[1], "d", "") + " " + strings.ReplaceAll(coords[2], "d", "") + " " + strings.ReplaceAll(coords[3], "d", "") + "\n"
-													io.WriteString(stdin, command)
+													_, _ = io.WriteString(stdin, command)
 													time.Sleep(400 * time.Millisecond)
 												}
 											}
