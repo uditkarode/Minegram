@@ -402,7 +402,8 @@ func main() {
 					} else if deathRegex.MatchString(m) {
 						result := simpleOutputRegex.FindStringSubmatch(m)
 						if len(result) == 2 {
-							_, _ = b.Send(targetChat, result[1]+".", "Markdown")
+							sep := strings.Split(result[1], " ")
+							_, _ = b.Send(targetChat, "`"+sep[0]+"` "+strings.Join(sep[1:], " ")+".", "Markdown")
 						}
 					} else if strings.Contains(m, "For help, type") {
 						cliExec(stdin, "/say Server initialised!")
