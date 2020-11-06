@@ -20,6 +20,7 @@ import (
 var lastLine = make(chan string)
 var online = []onlinePlayer{}
 var authEnabled = true
+var needResult = false
 
 func main() {
 	res := readConfig("config")
@@ -282,61 +283,66 @@ func main() {
 
 		fmt.Println(m)
 
-		go func() { lastLine <- m }()
-
-		if strings.Contains(m, "INFO") {
-			if chatRegex.MatchString(m) {
-				result := chatRegex.FindStringSubmatch(m)
-				if len(result) == 3 {
-					_, _ = b.Send(targetChat, "`"+result[1]+"`"+"**:** "+result[2], "Markdown")
-				}
-			} else if joinRegex.MatchString(m) {
-				result := joinRegex.FindStringSubmatch(m)
-				if len(result) == 2 {
-					user := result[1]
-					if !containsPlayer(online, user) {
-						newPlayer := onlinePlayer{inGameName: user}
-						online = append(online, newPlayer)
-						_, _ = b.Send(targetChat, "`"+user+"`"+" joined the server.", "Markdown")
-						if authEnabled {
-							io.WriteString(stdin, "effect give "+user+" minecraft:blindness 999999\n")
-							io.WriteString(stdin, "gamemode spectator "+user+"\n")
-							io.WriteString(stdin, "/tellraw "+user+" [\"\",{\"text\":\"If you haven't linked before, send \"},{\"text\":\"/link "+newPlayer.inGameName+" \",\"color\":\"green\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"},{\"text\":\"\\nIf you have \"},{\"text\":\"linked \",\"color\":\"green\"},{\"text\":\"your account, send \"},{\"text\":\"/auth \",\"color\":\"aqua\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"}]\n")
+		if needResult {
+			lastLine <- m
+			needResult = false
+		} else {
+			go func() {
+				if strings.Contains(m, "INFO") {
+					if chatRegex.MatchString(m) {
+						result := chatRegex.FindStringSubmatch(m)
+						if len(result) == 3 {
+							_, _ = b.Send(targetChat, "`"+result[1]+"`"+"**:** "+result[2], "Markdown")
 						}
+					} else if joinRegex.MatchString(m) {
+						result := joinRegex.FindStringSubmatch(m)
+						if len(result) == 2 {
+							user := result[1]
+							if !containsPlayer(online, user) {
+								newPlayer := onlinePlayer{inGameName: user}
+								online = append(online, newPlayer)
+								_, _ = b.Send(targetChat, "`"+user+"`"+" joined the server.", "Markdown")
+								if authEnabled {
+									io.WriteString(stdin, "effect give "+user+" minecraft:blindness 999999\n")
+									io.WriteString(stdin, "gamemode spectator "+user+"\n")
+									io.WriteString(stdin, "/tellraw "+user+" [\"\",{\"text\":\"If you haven't linked before, send \"},{\"text\":\"/link "+newPlayer.inGameName+" \",\"color\":\"green\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"},{\"text\":\"\\nIf you have \"},{\"text\":\"linked \",\"color\":\"green\"},{\"text\":\"your account, send \"},{\"text\":\"/auth \",\"color\":\"aqua\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"}]\n")
+								}
+							}
+						}
+					} else if joinRegexSpigotPaper.MatchString(m) {
+						result := joinRegex.FindStringSubmatch(m)
+						if len(result) == 2 {
+							user := result[1]
+							if !containsPlayer(online, user) {
+								newPlayer := onlinePlayer{inGameName: user}
+								online = append(online, newPlayer)
+								_, _ = b.Send(targetChat, "`"+user+"`"+" joined the server.", "Markdown")
+								if authEnabled {
+									io.WriteString(stdin, "effect give "+user+" minecraft:blindness 999999\n")
+									io.WriteString(stdin, "gamemode spectator "+user+"\n")
+									io.WriteString(stdin, "/tellraw "+user+" [\"\",{\"text\":\"If you haven't linked before, send \"},{\"text\":\"/link "+newPlayer.inGameName+" \",\"color\":\"green\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"},{\"text\":\"\\nIf you have \"},{\"text\":\"linked \",\"color\":\"green\"},{\"text\":\"your account, send \"},{\"text\":\"/auth \",\"color\":\"aqua\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"}]\n")
+								}
+							}
+						}
+					} else if leaveRegex.MatchString(m) {
+						result := leaveRegex.FindStringSubmatch(m)
+						if len(result) == 2 {
+							online = removePlayer(online, result[1])
+							_, _ = b.Send(targetChat, "`"+result[1]+"`"+" has left the server.", "Markdown")
+						}
+					} else if advancementRegex.MatchString(m) {
+						result := advancementRegex.FindStringSubmatch(m)
+						if len(result) == 3 {
+							_, _ = b.Send(targetChat, "`"+result[1]+"`"+" has made the advancement `"+result[2]+"`.", "Markdown")
+						}
+					} else if deathRegex.MatchString(m) {
+						result := strings.Split(m, " ")
+						_, _ = b.Send(targetChat, "`"+result[2]+"` "+strings.Join(result[4:], " ")+".", "Markdown")
+					} else if strings.Contains(m, "For help, type") {
+						cliExec(stdin, "/say Server initialised!")
 					}
 				}
-			} else if joinRegexSpigotPaper.MatchString(m) {
-				result := joinRegex.FindStringSubmatch(m)
-				if len(result) == 2 {
-					user := result[1]
-					if !containsPlayer(online, user) {
-						newPlayer := onlinePlayer{inGameName: user}
-						online = append(online, newPlayer)
-						_, _ = b.Send(targetChat, "`"+user+"`"+" joined the server.", "Markdown")
-						if authEnabled {
-							io.WriteString(stdin, "effect give "+user+" minecraft:blindness 999999\n")
-							io.WriteString(stdin, "gamemode spectator "+user+"\n")
-							io.WriteString(stdin, "/tellraw "+user+" [\"\",{\"text\":\"If you haven't linked before, send \"},{\"text\":\"/link "+newPlayer.inGameName+" \",\"color\":\"green\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"},{\"text\":\"\\nIf you have \"},{\"text\":\"linked \",\"color\":\"green\"},{\"text\":\"your account, send \"},{\"text\":\"/auth \",\"color\":\"aqua\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"}]\n")
-						}
-					}
-				}
-			} else if leaveRegex.MatchString(m) {
-				result := leaveRegex.FindStringSubmatch(m)
-				if len(result) == 2 {
-					online = removePlayer(online, result[1])
-					_, _ = b.Send(targetChat, "`"+result[1]+"`"+" has left the server.", "Markdown")
-				}
-			} else if advancementRegex.MatchString(m) {
-				result := advancementRegex.FindStringSubmatch(m)
-				if len(result) == 3 {
-					_, _ = b.Send(targetChat, "`"+result[1]+"`"+" has made the advancement `"+result[2]+"`.", "Markdown")
-				}
-			} else if deathRegex.MatchString(m) {
-				result := strings.Split(m, " ")
-				_, _ = b.Send(targetChat, "`"+result[3]+"` "+strings.Join(result[4:], " ")+".", "Markdown")
-			} else if strings.Contains(m, "For help, type") {
-				cliExec(stdin, "/say Server initialised!")
-			}
+			}()
 		}
 	}
 }
