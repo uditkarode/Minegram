@@ -5,7 +5,10 @@ import (
 )
 
 var chatRegex = regexp.MustCompile(`: <(.+)> (.+)`)
+
 var joinRegex = regexp.MustCompile(`.* (.+) joined the game`)
+var joinRegexSpigotPaper = regexp.MustCompile(`: UUID of player (.+) is .*`)
+
 var leaveRegex = regexp.MustCompile(`.* (.+) left the game`)
 var advancementRegex = regexp.MustCompile(`.* (.+) has made the advancement (.+)`)
 

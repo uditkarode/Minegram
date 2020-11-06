@@ -176,6 +176,12 @@ func main() {
 					online = append(online, result[1])
 					_, _ = b.Send(targetChat, "`"+result[1]+"`"+" joined the server.", "Markdown")
 				}
+			} else if joinRegexSpigotPaper.MatchString(m) {
+				result := joinRegexSpigotPaper.FindStringSubmatch(m)
+				if len(result) == 2 {
+					online = append(online, result[1])
+					_, _ = b.Send(targetChat, "`"+result[1]+"`"+" joined the server.", "Markdown")
+				}
 			} else if leaveRegex.MatchString(m) {
 				result := leaveRegex.FindStringSubmatch(m)
 				if len(result) == 2 {
