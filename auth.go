@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"strings"
 
 	tb "gopkg.in/tucnak/telebot.v2"
@@ -13,7 +14,13 @@ type player struct {
 	TgUsn string
 }
 
-func setupAuthCommands(b *tb.Bot, db *gorm.DB) {
+type onlinePlayer struct {
+	inGameName  string
+	startCoords string
+	isAuthd     bool
+}
+
+func setupAuthCommands(b *tb.Bot, db *gorm.DB, stdin io.WriteCloser) {
 	b.Handle("/link", func(m *tb.Message) {
 		if m.Payload == "" {
 			b.Reply(m, "Enter an IGN to link to your account!")
@@ -59,9 +66,11 @@ func setupAuthCommands(b *tb.Bot, db *gorm.DB) {
 			var linked player
 			db.First(&linked, "tg_usn = ?", m.Sender.Username)
 			if linked.McIgn != "" {
-				if contains(online, linked.McIgn) {
+				if containsPlayer(online, linked.McIgn) {
 					if linked.TgUsn == m.Sender.Username {
 						b.Reply(m, "You have successfully authenticated yourself as `"+linked.McIgn+"`!", "Markdown")
+						io.WriteString(stdin, "effect clear "+linked.McIgn+" blindness\n")
+						io.WriteString(stdin, "gamemode survival "+linked.McIgn+"\n")
 					} else {
 						b.Reply(m, "This Telegram account is not linked to the IGN `"+linked.McIgn+"`!", "Markdown")
 					}

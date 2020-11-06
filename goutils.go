@@ -1,8 +1,8 @@
 package main
 
-func remove(s []string, r string) []string {
+func removePlayer(s []onlinePlayer, r string) []onlinePlayer {
 	for i, v := range s {
-		if v == r {
+		if v.inGameName == r {
 			return append(s[:i], s[i+1:]...)
 		}
 	}
@@ -16,4 +16,22 @@ func contains(s []string, e string) bool {
 		}
 	}
 	return false
+}
+
+func containsPlayer(s []onlinePlayer, e string) bool {
+	for _, a := range s {
+		if a.inGameName == e {
+			return true
+		}
+	}
+	return false
+}
+
+func getOnlinePlayer(ign string) onlinePlayer {
+	for _, player := range online {
+		if player.inGameName == ign {
+			return player
+		}
+	}
+	return onlinePlayer{}
 }
