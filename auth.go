@@ -71,7 +71,7 @@ func setupAuthCommands(b *tb.Bot, db *gorm.DB, stdin io.WriteCloser) {
 		}
 
 		if m.Payload != "" {
-			b.Reply(m, "`auth` does not take any arguments.")
+			b.Reply(m, "`auth` does not take any arguments.", "Markdown")
 		} else {
 			var linked player
 			db.First(&linked, "tg_usn = ?", m.Sender.Username)
@@ -79,6 +79,7 @@ func setupAuthCommands(b *tb.Bot, db *gorm.DB, stdin io.WriteCloser) {
 				if containsPlayer(online, linked.McIgn) {
 					if linked.TgUsn == m.Sender.Username {
 						b.Reply(m, "You have successfully authenticated yourself as `"+linked.McIgn+"`!", "Markdown")
+						authOnlinePlayer(linked.McIgn)
 						io.WriteString(stdin, "effect clear "+linked.McIgn+" blindness\n")
 						io.WriteString(stdin, "gamemode survival "+linked.McIgn+"\n")
 					} else {
@@ -88,7 +89,7 @@ func setupAuthCommands(b *tb.Bot, db *gorm.DB, stdin io.WriteCloser) {
 					b.Reply(m, "Your IGN (`"+linked.McIgn+"`) must be in-game to `auth`!", "Markdown")
 				}
 			} else {
-				b.Reply(m, "You need to use `/link` before trying to `auth`")
+				b.Reply(m, "You need to use `/link` before trying to `auth`", "Markdown")
 			}
 		}
 	})

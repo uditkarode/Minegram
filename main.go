@@ -294,33 +294,34 @@ func main() {
 						if len(result) == 3 {
 							_, _ = b.Send(targetChat, "`"+result[1]+"`"+"**:** "+result[2], "Markdown")
 						}
-					} else if joinRegex.MatchString(m) {
+					} else if joinRegex.MatchString(m) || joinRegexSpigotPaper.MatchString(m) {
 						result := joinRegex.FindStringSubmatch(m)
 						if len(result) == 2 {
 							user := result[1]
 							if !containsPlayer(online, user) {
-								newPlayer := onlinePlayer{inGameName: user}
+								newPlayer := onlinePlayer{inGameName: user, isAuthd: false}
 								online = append(online, newPlayer)
 								_, _ = b.Send(targetChat, "`"+user+"`"+" joined the server.", "Markdown")
 								if authEnabled {
+									newPlayer.startCoords = cliExec(stdin, "data get entity "+user+" Pos")
+									coords := entityPosRegex.FindStringSubmatch(newPlayer.startCoords)
+
 									io.WriteString(stdin, "effect give "+user+" minecraft:blindness 999999\n")
 									io.WriteString(stdin, "gamemode spectator "+user+"\n")
-									io.WriteString(stdin, "/tellraw "+user+" [\"\",{\"text\":\"If you haven't linked before, send \"},{\"text\":\"/link "+newPlayer.inGameName+" \",\"color\":\"green\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"},{\"text\":\"\\nIf you have \"},{\"text\":\"linked \",\"color\":\"green\"},{\"text\":\"your account, send \"},{\"text\":\"/auth \",\"color\":\"aqua\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"}]\n")
-								}
-							}
-						}
-					} else if joinRegexSpigotPaper.MatchString(m) {
-						result := joinRegex.FindStringSubmatch(m)
-						if len(result) == 2 {
-							user := result[1]
-							if !containsPlayer(online, user) {
-								newPlayer := onlinePlayer{inGameName: user}
-								online = append(online, newPlayer)
-								_, _ = b.Send(targetChat, "`"+user+"`"+" joined the server.", "Markdown")
-								if authEnabled {
-									io.WriteString(stdin, "effect give "+user+" minecraft:blindness 999999\n")
-									io.WriteString(stdin, "gamemode spectator "+user+"\n")
-									io.WriteString(stdin, "/tellraw "+user+" [\"\",{\"text\":\"If you haven't linked before, send \"},{\"text\":\"/link "+newPlayer.inGameName+" \",\"color\":\"green\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"},{\"text\":\"\\nIf you have \"},{\"text\":\"linked \",\"color\":\"green\"},{\"text\":\"your account, send \"},{\"text\":\"/auth \",\"color\":\"aqua\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"}]\n")
+									io.WriteString(stdin, "tellraw "+user+" [\"\",{\"text\":\"If you haven't linked before, send \"},{\"text\":\"/link "+newPlayer.inGameName+" \",\"color\":\"green\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"},{\"text\":\"\\nIf you have \"},{\"text\":\"linked \",\"color\":\"green\"},{\"text\":\"your account, send \"},{\"text\":\"/auth \",\"color\":\"aqua\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"}]\n")
+
+									if len(coords) == 4 {
+										for {
+											player := getOnlinePlayer(user)
+											fmt.Println(player)
+											if player.isAuthd || player.inGameName == "" {
+												break
+											} else {
+												io.WriteString(stdin, "tp "+user+" "+strings.ReplaceAll(coords[1], "d", "")+" "+strings.ReplaceAll(coords[2], "d", "")+" "+strings.ReplaceAll(coords[3], "d", "")+"\n")
+												time.Sleep(400 * time.Millisecond)
+											}
+										}
+									}
 								}
 							}
 						}

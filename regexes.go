@@ -17,4 +17,4 @@ var deathRegex = regexp.MustCompile(`(.+) (was (shot by .+|shot off (some vines|
 
 var timeRegex = regexp.MustCompile(`: The time is (.+)`)
 
-var entityPosRegex = regexp.MustCompile(`: .+ has the following entity data: [(.+)d?, (.+)d?, (.+)d?]`)
+var entityPosRegex = regexp.MustCompile(`: .+ has the following entity data: \[(.+)d?, (.+)d?, (.+)d?\]`)

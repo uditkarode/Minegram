@@ -35,3 +35,12 @@ func getOnlinePlayer(ign string) onlinePlayer {
 	}
 	return onlinePlayer{}
 }
+
+func authOnlinePlayer(ign string) {
+	for i, player := range online {
+		if player.inGameName == ign {
+			online[i].isAuthd = true
+			break
+		}
+	}
+}

@@ -27,7 +27,7 @@ func itsTwoDigit(s int) string {
 
 /* ALWAYS run this in a separate goroutine! */
 func cliExec(stdin io.WriteCloser, cmd string) string {
-	io.WriteString(stdin, cmd+"\n")
 	needResult = true
+	io.WriteString(stdin, cmd+"\n")
 	return <-lastLine
 }
