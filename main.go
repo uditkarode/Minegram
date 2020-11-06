@@ -19,6 +19,7 @@ import (
 
 var lastLine = make(chan string)
 var online = []onlinePlayer{}
+var authEnabled = true
 
 func main() {
 	res := readConfig("config")
@@ -35,6 +36,7 @@ func main() {
 	tok := res["bot_token"]
 	tchat := res["target_chat"]
 	admUsersRaw := res["admin_usernames"]
+	authEnabledRaw := res["auth_enabled"]
 
 	if cmd == "" {
 		fmt.Println("Please enter a 'command' in the config!")
@@ -54,6 +56,15 @@ func main() {
 	if admUsersRaw == "" {
 		fmt.Println("Please enter an 'admin_usernames' in the config!")
 		os.Exit(0)
+	}
+
+	if authEnabledRaw == "" {
+		fmt.Println("Please enter an 'auth_enabled' in the config!")
+		os.Exit(0)
+	}
+
+	if authEnabledRaw != "true" {
+		authEnabled = false
 	}
 
 	admUsers := strings.Split(admUsersRaw, ",")
@@ -287,20 +298,24 @@ func main() {
 						newPlayer := onlinePlayer{inGameName: user}
 						online = append(online, newPlayer)
 						_, _ = b.Send(targetChat, "`"+user+"`"+" joined the server.", "Markdown")
-						io.WriteString(stdin, "effect give "+user+" minecraft:blindness 999999\n")
-						io.WriteString(stdin, "gamemode spectator "+user+"\n")
+						if authEnabled {
+							io.WriteString(stdin, "effect give "+user+" minecraft:blindness 999999\n")
+							io.WriteString(stdin, "gamemode spectator "+user+"\n")
+						}
 					}
 				}
 			} else if joinRegexSpigotPaper.MatchString(m) {
-				result := joinRegexSpigotPaper.FindStringSubmatch(m)
+				result := joinRegex.FindStringSubmatch(m)
 				if len(result) == 2 {
 					user := result[1]
 					if !containsPlayer(online, user) {
-						io.WriteString(stdin, "effect give "+user+" minecraft:blindness 999999\n")
-						io.WriteString(stdin, "gamemode spectator "+user)
 						newPlayer := onlinePlayer{inGameName: user}
 						online = append(online, newPlayer)
 						_, _ = b.Send(targetChat, "`"+user+"`"+" joined the server.", "Markdown")
+						if authEnabled {
+							io.WriteString(stdin, "effect give "+user+" minecraft:blindness 999999\n")
+							io.WriteString(stdin, "gamemode spectator "+user+"\n")
+						}
 					}
 				}
 			} else if leaveRegex.MatchString(m) {

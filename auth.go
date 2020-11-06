@@ -22,6 +22,11 @@ type onlinePlayer struct {
 
 func setupAuthCommands(b *tb.Bot, db *gorm.DB, stdin io.WriteCloser) {
 	b.Handle("/link", func(m *tb.Message) {
+		if !authEnabled {
+			b.Reply(m, "The `auth` module has been disabled.", "Markdown")
+			return
+		}
+
 		if m.Payload == "" {
 			b.Reply(m, "Enter an IGN to link to your account!")
 		} else {
@@ -60,6 +65,11 @@ func setupAuthCommands(b *tb.Bot, db *gorm.DB, stdin io.WriteCloser) {
 	})
 
 	b.Handle("/auth", func(m *tb.Message) {
+		if !authEnabled {
+			b.Reply(m, "The `auth` module has been disabled.", "Markdown")
+			return
+		}
+
 		if m.Payload != "" {
 			b.Reply(m, "`auth` does not take any arguments.")
 		} else {
