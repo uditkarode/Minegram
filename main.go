@@ -18,11 +18,10 @@ import (
 )
 
 var lastLine = make(chan string)
+var online = []string{}
 
 func main() {
 	res := readConfig("config")
-
-	online := []string{}
 
 	db, err := gorm.Open(sqlite.Open("minegram.db"), &gorm.Config{})
 

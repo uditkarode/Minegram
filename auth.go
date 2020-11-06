@@ -24,7 +24,11 @@ func setupAuthCommands(b *tb.Bot, db *gorm.DB) {
 			var existing player
 			db.First(&existing, "mc_ign = ?", ign)
 			if existing.McIgn != "" {
-				b.Reply(m, "This IGN has already been linked to another Telegram account!")
+				if existing.TgUsn == m.Sender.Username {
+					b.Reply(m, "You have already linked this IGN with your account!")
+				} else {
+					b.Reply(m, "This IGN has already been linked to a different Telegram account!")
+				}
 			} else {
 				var existingUsn player
 				db.First(&existingUsn, "tg_usn = ?", m.Sender.Username)
@@ -44,6 +48,28 @@ func setupAuthCommands(b *tb.Bot, db *gorm.DB) {
 					db.Create(&player{McIgn: ign, TgUsn: m.Sender.Username})
 					b.Reply(m, "The Minecraft IGN `"+ign+"` has been successfully linked to the telegram account `@"+m.Sender.Username+"`!", "Markdown")
 				}
+			}
+		}
+	})
+
+	b.Handle("/auth", func(m *tb.Message) {
+		if m.Payload != "" {
+			b.Reply(m, "`auth` does not take any arguments.")
+		} else {
+			var linked player
+			db.First(&linked, "tg_usn = ?", m.Sender.Username)
+			if linked.McIgn != "" {
+				if contains(online, linked.McIgn) {
+					if linked.TgUsn == m.Sender.Username {
+						b.Reply(m, "You have successfully authenticated yourself as `"+linked.McIgn+"`!", "Markdown")
+					} else {
+						b.Reply(m, "This Telegram account is not linked to the IGN `"+linked.McIgn+"`!", "Markdown")
+					}
+				} else {
+					b.Reply(m, "Your IGN (`"+linked.McIgn+"`) must be in-game to `auth`!", "Markdown")
+				}
+			} else {
+				b.Reply(m, "You need to use `/link` before trying to `auth`")
 			}
 		}
 	})
