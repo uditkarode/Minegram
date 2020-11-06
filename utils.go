@@ -1,5 +1,9 @@
 package main
 
+import (
+	"io"
+)
+
 type group struct {
 	id string
 }
@@ -17,7 +21,7 @@ func remove(s []string, r string) []string {
 	return s
 }
 
-func cliExec(cmd string) string {
+func cliExec(stdin io.WriteCloser, cmd string) string {
 L:
 	for {
 		select {
@@ -27,8 +31,6 @@ L:
 		}
 	}
 
-	child.Send(cmd + "\n")
-	/* dispose stdin mirror */
-	<-lastLine
+	io.WriteString(stdin, cmd+"\n")
 	return <-lastLine
 }
