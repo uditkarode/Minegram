@@ -301,6 +301,7 @@ func main() {
 						if authEnabled {
 							io.WriteString(stdin, "effect give "+user+" minecraft:blindness 999999\n")
 							io.WriteString(stdin, "gamemode spectator "+user+"\n")
+							io.WriteString(stdin, "/tellraw "+user+" [\"\",{\"text\":\"If you haven't linked before, send \"},{\"text\":\"/link "+newPlayer.inGameName+" \",\"color\":\"green\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"},{\"text\":\"\\nIf you have \"},{\"text\":\"linked \",\"color\":\"green\"},{\"text\":\"your account, send \"},{\"text\":\"/auth \",\"color\":\"aqua\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"}]\n")
 						}
 					}
 				}
@@ -315,6 +316,7 @@ func main() {
 						if authEnabled {
 							io.WriteString(stdin, "effect give "+user+" minecraft:blindness 999999\n")
 							io.WriteString(stdin, "gamemode spectator "+user+"\n")
+							io.WriteString(stdin, "/tellraw "+user+" [\"\",{\"text\":\"If you haven't linked before, send \"},{\"text\":\"/link "+newPlayer.inGameName+" \",\"color\":\"green\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"},{\"text\":\"\\nIf you have \"},{\"text\":\"linked \",\"color\":\"green\"},{\"text\":\"your account, send \"},{\"text\":\"/auth \",\"color\":\"aqua\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"}]\n")
 						}
 					}
 				}

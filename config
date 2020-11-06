@@ -1,3 +1,20 @@
+# the command that you use to start the Minecraft server
 command = java -Xmx1024M -Xms1024M -jar server.jar
+
+# the bot token that you got from BotFather
+# make sure that bot privacy is turned OFF
 bot_token = 3869174826:KXMWHATEVER_KXC_sogfu8vn3jv89a0xl2mc
+
+# the chat that you want target
+# updates and notifications to be
+# sent on
 target_chat = -1001251355942
+
+# a comma separated list of
+# usernames of admins that
+# can moderate the server
+admin_usernames = uditkarode
+
+# whether the auth
+# module should be enabled
+auth_enabled = true

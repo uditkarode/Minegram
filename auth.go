@@ -51,7 +51,7 @@ func setupAuthCommands(b *tb.Bot, db *gorm.DB, stdin io.WriteCloser) {
 							db.Model(&existingUsn).Update("mc_ign", ign)
 							b.Reply(m, "Your account has been un-linked from `"+oldIgn+"` and linked to `"+ign+"`.", "Markdown")
 						} else {
-							b.Reply(m, "The second argument must be '`confirm`'!")
+							b.Reply(m, "The second argument must be '`confirm`'!", "Markdown")
 						}
 					} else {
 						b.Reply(m, "Your account will be un-linked from `"+oldIgn+"` and linked to `"+ign+"`. To confirm this action, use:\n\n`/link "+ign+" confirm`", "Markdown")
