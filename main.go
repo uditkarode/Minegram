@@ -25,6 +25,7 @@ func main() {
 	cmd := res["command"]
 	tok := res["bot_token"]
 	tchat := res["target_chat"]
+	admUsersRaw := res["admin_usernames"]
 
 	if cmd == "" {
 		fmt.Println("Please enter a 'command' in the config!")
@@ -40,6 +41,13 @@ func main() {
 		fmt.Println("Please enter a 'target_chat' in the config!")
 		os.Exit(0)
 	}
+
+	if admUsersRaw == "" {
+		fmt.Println("Please enter an 'admin_usernames' in the config!")
+		os.Exit(0)
+	}
+
+	admUsers := strings.Split(admUsersRaw, ",")
 
 	var targetChat tb.Recipient
 	targetChat = group{id: tchat}
@@ -99,6 +107,19 @@ func main() {
 			res += "\n- `" + player + "`"
 		}
 		_, _ = b.Send(targetChat, res, "Markdown")
+	})
+
+	b.Handle("/cli", func(m *tb.Message) {
+		if contains(admUsers, m.Sender.Username) {
+			if m.Payload == "" {
+				b.Reply(m, "Enter a command to execute!")
+			} else {
+				output := cliExec(stdin, m.Payload)
+				b.Reply(m, "`"+output+"`", "Markdown")
+			}
+		} else {
+			b.Reply(m, "You are not authorised to use this command!")
+		}
 	})
 
 	b.Handle("/time", func(m *tb.Message) {
