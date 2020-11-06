@@ -307,7 +307,7 @@ func main() {
 					color.Unset()
 
 					color.Set(color.FgGreen)
-					fmt.Print(toLog[2] + " " + toLog[3])
+					fmt.Print(toLog[2] + ": " + toLog[3])
 					color.Unset()
 
 					fmt.Print("\n")
@@ -326,7 +326,7 @@ func main() {
 					color.Unset()
 
 					color.Set(color.FgRed)
-					fmt.Print(toLog[2] + " " + toLog[3])
+					fmt.Print(toLog[2] + ": " + toLog[3])
 					color.Unset()
 
 					fmt.Print("\n")
