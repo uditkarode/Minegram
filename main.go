@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/fatih/color"
 	"io"
 	"os"
 	"os/exec"
@@ -297,7 +298,47 @@ func main() {
 	for scanner.Scan() {
 		m := scanner.Text()
 
-		fmt.Println(m)
+		if strings.Contains(m, "INFO") {
+			if genericOutputRegex.MatchString(m) {
+				toLog := genericOutputRegex.FindStringSubmatch(m)
+				if len(toLog) == 4 {
+					color.Set(color.FgYellow)
+					fmt.Print(toLog[1] + " ")
+					color.Unset()
+
+					color.Set(color.FgGreen)
+					fmt.Print(toLog[2] + " " + toLog[3])
+					color.Unset()
+
+					fmt.Print("\n")
+				} else {
+					fmt.Println(m)
+				}
+			} else {
+				fmt.Println(m)
+			}
+		} else if strings.Contains(m, "WARN") {
+			if genericOutputRegex.MatchString(m) {
+				toLog := genericOutputRegex.FindStringSubmatch(m)
+				if len(toLog) == 4 {
+					color.Set(color.FgYellow)
+					fmt.Print(toLog[1] + " ")
+					color.Unset()
+
+					color.Set(color.FgRed)
+					fmt.Print(toLog[2] + " " + toLog[3])
+					color.Unset()
+
+					fmt.Print("\n")
+				} else {
+					fmt.Println(m)
+				}
+			} else {
+				fmt.Println(m)
+			}
+		} else {
+			fmt.Println(m)
+		}
 
 		if needResult {
 			lastLine <- m

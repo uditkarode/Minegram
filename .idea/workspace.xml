@@ -4,6 +4,7 @@
     <list default="true" id="3a95d6cf-7220-4975-9d50-8a333bbc1940" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/regexes.go" beforeDir="false" afterPath="$PROJECT_DIR$/regexes.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,9 +45,10 @@
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
     <state x="739" y="274" key="#com.intellij.ide.util.MemberChooser/0.0.1920.1080@0.0.1920.1080" timestamp="1604423743758" />
-    <state x="623" y="257" key="search.everywhere.popup" timestamp="1604410020212">
-      <screen x="0" y="0" width="1920" height="1080" />
+    <state x="2543" y="257" width="672" height="678" key="search.everywhere.popup" timestamp="1604690706107">
+      <screen x="1920" y="0" width="1920" height="1080" />
     </state>
+    <state x="2543" y="257" width="672" height="678" key="search.everywhere.popup/0.0.1920.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1604690706107" />
     <state x="623" y="257" key="search.everywhere.popup/0.0.1920.1080@0.0.1920.1080" timestamp="1604410020212" />
   </component>
 </project>
