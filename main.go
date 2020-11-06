@@ -303,22 +303,28 @@ func main() {
 								online = append(online, newPlayer)
 								_, _ = b.Send(targetChat, "`"+user+"`"+" joined the server.", "Markdown")
 								if authEnabled {
-									newPlayer.startCoords = cliExec(stdin, "data get entity "+user+" Pos")
-									coords := entityPosRegex.FindStringSubmatch(newPlayer.startCoords)
+									startCoords := cliExec(stdin, "data get entity "+user+" Pos")
+									coords := entityPosRegex.FindStringSubmatch(startCoords)
+
+									dimensionStr := cliExec(stdin, "data get entity "+user+" Dimension")
+									dimension := dimensionRegex.FindStringSubmatch(dimensionStr)
 
 									io.WriteString(stdin, "effect give "+user+" minecraft:blindness 999999\n")
 									io.WriteString(stdin, "gamemode spectator "+user+"\n")
 									io.WriteString(stdin, "tellraw "+user+" [\"\",{\"text\":\"If you haven't linked before, send \"},{\"text\":\"/link "+newPlayer.inGameName+" \",\"color\":\"green\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"},{\"text\":\"\\nIf you have \"},{\"text\":\"linked \",\"color\":\"green\"},{\"text\":\"your account, send \"},{\"text\":\"/auth \",\"color\":\"aqua\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"}]\n")
 
 									if len(coords) == 4 {
-										for {
-											player := getOnlinePlayer(user)
-											fmt.Println(player)
-											if player.isAuthd || player.inGameName == "" {
-												break
-											} else {
-												io.WriteString(stdin, "tp "+user+" "+strings.ReplaceAll(coords[1], "d", "")+" "+strings.ReplaceAll(coords[2], "d", "")+" "+strings.ReplaceAll(coords[3], "d", "")+"\n")
-												time.Sleep(400 * time.Millisecond)
+										if len(dimension) == 2 {
+											for {
+												player := getOnlinePlayer(user)
+												fmt.Println(player)
+												if player.isAuthd || player.inGameName == "" {
+													break
+												} else {
+													command := "execute in " + dimension[1] + " run tp " + user + " " + strings.ReplaceAll(coords[1], "d", "") + " " + strings.ReplaceAll(coords[2], "d", "") + " " + strings.ReplaceAll(coords[3], "d", "") + "\n"
+													io.WriteString(stdin, command)
+													time.Sleep(400 * time.Millisecond)
+												}
 											}
 										}
 									}
