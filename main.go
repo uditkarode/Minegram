@@ -105,7 +105,58 @@ func main() {
 		output := cliExec(stdin, "time query daytime")
 		result := timeRegex.FindStringSubmatch(output)
 		if len(result) == 2 {
-			_, _ = b.Send(targetChat, result[1], "Markdown")
+			tick, err := strconv.Atoi(result[1])
+			if err == nil {
+				secondsPassed := int(float64(tick) * 3.6)
+				minutesPassed := 0
+				hoursPassed := 0
+
+				if secondsPassed > 60 {
+					minutesPassed = secondsPassed / 60
+					secondsPassed = secondsPassed % 60
+				}
+
+				if minutesPassed > 60 {
+					hoursPassed = minutesPassed / 60
+					minutesPassed = minutesPassed % 60
+				}
+
+				hoursPassed += 6
+
+				var emojiStr string
+
+				if hoursPassed >= 24 {
+					hoursPassed -= 24
+				}
+
+				if hoursPassed >= 0 && hoursPassed < 6 {
+					emojiStr = "🌌 <i>Midnight</i>"
+				} else if hoursPassed >= 6 && hoursPassed < 7 {
+					emojiStr = "🌄 <i>Early Morning</i>"
+				} else if hoursPassed >= 7 && hoursPassed < 12 {
+					emojiStr = "🌅 <i>Day</i>"
+				} else if hoursPassed >= 12 && hoursPassed < 17 {
+					emojiStr = "🌇 <i>Noon</i>"
+				} else if hoursPassed >= 17 && hoursPassed < 19 {
+					emojiStr = "🌅 <i>Evening</i>"
+				} else if hoursPassed >= 19 && hoursPassed < 24 {
+					emojiStr = "🌃 <i>Night</i>"
+				}
+
+				timeStr := emojiStr + "\n<b>Time</b>: <code> "
+
+				if hoursPassed < 12 {
+					timeStr += itsTwoDigit(hoursPassed) + ":" + itsTwoDigit(minutesPassed) + " AM</code>"
+				} else {
+					timeStr += itsTwoDigit(hoursPassed-12) + ":" + itsTwoDigit(minutesPassed) + " PM</code>"
+				}
+
+				timeStr += "\n<b>Ticks</b>: <code>" + its(tick) + "</code>"
+				_, err = b.Send(targetChat, timeStr, "HTML")
+				if err != nil {
+					fmt.Println(err)
+				}
+			}
 		}
 	})
 
