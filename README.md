@@ -12,6 +12,7 @@ Compiling from source is very easy:
 go get -u gopkg.in/tucnak/telebot.v2
 go get -u gorm.io/gorm
 go get -u gorm.io/driver/sqlite
+go get -u github.com/fatih/color
 go build
 ```
   
