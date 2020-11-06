@@ -26,15 +26,8 @@ func itsTwoDigit(s int) string {
 }
 
 func cliExec(stdin io.WriteCloser, cmd string) string {
-L:
-	for {
-		select {
-		case <-lastLine:
-		default:
-			break L
-		}
-	}
-
+	lastLine = nil
+	lastLine = make(chan string)
 	io.WriteString(stdin, cmd+"\n")
 	return <-lastLine
 }
