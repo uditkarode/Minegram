@@ -13,6 +13,8 @@ import (
 	"time"
 
 	tb "gopkg.in/tucnak/telebot.v2"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 var lastLine = make(chan string)
@@ -21,6 +23,14 @@ func main() {
 	res := readConfig("config")
 
 	online := []string{}
+
+	db, err := gorm.Open(sqlite.Open("minegram.db"), &gorm.Config{})
+
+	if err != nil {
+		panic("failed to connect database")
+	}
+
+	db.AutoMigrate(&player{})
 
 	cmd := res["command"]
 	tok := res["bot_token"]
@@ -121,6 +131,8 @@ func main() {
 			b.Reply(m, "You are not authorised to use this command!")
 		}
 	})
+
+	setupAuthCommands(b, db)
 
 	b.Handle("/time", func(m *tb.Message) {
 		output := cliExec(stdin, "time query daytime")
