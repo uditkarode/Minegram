@@ -69,7 +69,7 @@ func main() {
 	}
 
 	execCmd.SysProcAttr = &syscall.SysProcAttr{
-		Pdeathsig: syscall.SIGTERM,
+		Setpgid: true,
 	}
 
 	go func() {
@@ -176,7 +176,7 @@ func main() {
 	go func() {
 		for range c {
 			fmt.Println("\n********************\nRunning cleanup! Please wait...\n********************")
-			execCmd.Process.Signal(os.Interrupt)
+			io.WriteString(stdin, "stop\n")
 			execCmd.Wait()
 			os.Exit(0)
 		}
