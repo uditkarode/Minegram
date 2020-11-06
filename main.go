@@ -337,8 +337,10 @@ func main() {
 							_, _ = b.Send(targetChat, "`"+result[1]+"`"+" has made the advancement `"+result[2]+"`.", "Markdown")
 						}
 					} else if deathRegex.MatchString(m) {
-						result := strings.Split(m, " ")
-						_, _ = b.Send(targetChat, "`"+result[2]+"` "+strings.Join(result[4:], " ")+".", "Markdown")
+						result := simpleOutputRegex.FindStringSubmatch(m)
+						if len(result) == 2 {
+							_, _ = b.Send(targetChat, result[1]+".", "Markdown")
+						}
 					} else if strings.Contains(m, "For help, type") {
 						cliExec(stdin, "/say Server initialised!")
 					}
