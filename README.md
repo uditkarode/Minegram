@@ -1,9 +1,7 @@
 # Minegram
-Minegram is a Minecraft-Telegram bridge.
+Minegram is a Minecraft-Telegram bridge. Read ahead for more examples and usage guide.
   
-![Reply](images/reply.jpg)
 ![Other Types](images/othertypes.jpg)
-![Telegram](images/tg.jpg)
   
 # What can it do?
 1) Minegram can connect your Minecraft Java server with your Telegram chat. This means that whenever a player joins, leaves, makes an advancement, dies, or sends a chat message, a bot will notify the Telegram chat of it by sending a message. Messages sent on Telegram will also be displayed to players in Minecraft, allowing them to chat with people on Telegram through Minecraft or vice-versa.
@@ -28,5 +26,9 @@ go get -u gorm.io/driver/sqlite
 go get -u github.com/fatih/color
 go build
 ```
-  
+# More Examples
+![Reply](images/reply.jpg)
+![Telegram](images/tg.jpg)
+![Authentication](images/auth.jpg)
+
 IMPORTANT: make sure that bot privacy is turned **off** using BotFather so that non-command messages can be read by the bot!
