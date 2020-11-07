@@ -1,6 +1,10 @@
 # Minegram
 Minegram is a Minecraft-Telegram bridge.
-    
+  
+![Reply](images/reply.jpg)
+![Other Types](images/othertypes.jpg)
+![Telegram](images/tg.jpg)
+  
 # What can it do?
 1) Minegram can connect your Minecraft Java server with your Telegram chat. This means that whenever a player joins, leaves, makes an advancement, dies, or sends a chat message, a bot will notify the Telegram chat of it by sending a message. Messages sent on Telegram will also be displayed to players in Minecraft, allowing them to chat with people on Telegram through Minecraft or vice-versa.
     
@@ -8,10 +12,10 @@ Minegram is a Minecraft-Telegram bridge.
 
 3) Minegram can show the list of players online using `/list` on Telegram. It can also display the time in the Minecraft world by using `/time`.
   
-4) Minegram comes with a toggleable Auth module. When the Auth module is enabled, players will have to link their Telegram accounts with their Minecraft IGN(In Game Name)s using the command `/link players_ign`. When a player joins the server, the gamemode for that player will automatically be switched to spectator mode, the player will be given blindness, and will be prevented from moving unless the linked Telegram account sends `/auth` on Telegram. This prevents people from logging on to offline-mode/cracked servers with other player's IGN(In Game Name)s and stealing their items/misbehaving with their identity.
+4) Minegram comes with a toggleable Auth module. When the Auth module is enabled, players will have to link their Telegram accounts with their Minecraft IGN(In Game Name)s using the command `/link player_ign_here`. When a player joins the server, the gamemode for that player will automatically be switched to spectator mode, the player will be given blindness, and will be prevented from moving unless the linked Telegram account sends `/auth` on Telegram. This prevents people from logging on to offline-mode/cracked servers with other player's IGN(In Game Name)s and stealing their items/misbehaving with their identity.
   
 # How to use
-Grab the binary from https://github.com/uditkarode/Minegram/releases. Place it in the same folder as your Minecraft server JAR,  and also create a config file in the same directory. Sample contents of the config file are given in the config file in this repository.
+Grab the binary from https://github.com/uditkarode/Minegram/releases. Place it in the same folder as your Minecraft server JAR,  and also create a config file in the same directory with the filename `config` (NOTE: no extension!). Sample contents of the config file are given in the config file in this repository.
 Then just execute the binary: `./Minegram` and you're set!
   
 # Compiling from source
