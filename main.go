@@ -383,7 +383,7 @@ func main() {
 												if player.isAuthd || player.inGameName == "" {
 													break
 												} else {
-													command := "execute in " + dimension[1] + " run tp " + user + " " + strings.ReplaceAll(coords[1], "d", "") + " " + strings.ReplaceAll(coords[2], "d", "") + " " + strings.ReplaceAll(coords[3], "d", "") + "\n"
+													command := "execute in " + dimension[1] + " run tp " + user + " " + coords[1] + " " + coords[2] + " " + coords[3] + "\n"
 													_, _ = io.WriteString(stdin, command)
 													time.Sleep(400 * time.Millisecond)
 												}
@@ -408,7 +408,13 @@ func main() {
 						result := simpleOutputRegex.FindStringSubmatch(m)
 						if len(result) == 2 {
 							sep := strings.Split(result[1], " ")
-							_, _ = b.Send(targetChat, "`"+sep[0]+"` "+strings.Join(sep[1:], " ")+".", "Markdown")
+							startCoords := cliExec(stdin, "data get entity "+sep[0]+" Pos")
+							coords := simplifiedEPRegex.FindStringSubmatch(startCoords)
+							toSend := "`" + sep[0] + "` " + strings.Join(sep[1:], " ")
+							if len(coords) == 4 {
+								toSend += " at (`" + coords[1] + " " + coords[2] + " " + coords[3] + "`)"
+							}
+							_, _ = b.Send(targetChat, toSend+".", "Markdown")
 						}
 					} else if strings.Contains(m, "For help, type") {
 						cliExec(stdin, "say Server initialised!")
