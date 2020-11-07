@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/fatih/color"
 	"io"
 	"os"
 	"os/exec"
@@ -12,6 +11,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/fatih/color"
 
 	tb "gopkg.in/tucnak/telebot.v2"
 	"gorm.io/driver/sqlite"
@@ -358,7 +359,11 @@ func main() {
 							if !containsPlayer(online, user) {
 								newPlayer := onlinePlayer{inGameName: user, isAuthd: false}
 								online = append(online, newPlayer)
-								_, _ = b.Send(targetChat, "`"+user+"`"+" joined the server.", "Markdown")
+								toSend := "`" + user + "`" + " joined the server."
+								if authEnabled {
+									toSend += "\nUse /auth to authenticate."
+								}
+								_, _ = b.Send(targetChat, toSend, "Markdown")
 								if authEnabled {
 									startCoords := cliExec(stdin, "data get entity "+user+" Pos")
 									coords := entityPosRegex.FindStringSubmatch(startCoords)
