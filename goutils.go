@@ -27,6 +27,20 @@ func containsPlayer(s []onlinePlayer, e string) bool {
 	return false
 }
 
+func getGameType(gtype string) string {
+	switch gtype {
+	case "0":
+		return "survival"
+	case "1":
+		return "creative"
+	case "2":
+		return "adventure"
+	case "3":
+		return "spectator"
+	default:
+		return "survival"
+	}
+}
 func getOnlinePlayer(ign string) onlinePlayer {
 	for _, player := range online {
 		if player.inGameName == ign {

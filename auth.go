@@ -12,6 +12,8 @@ type player struct {
 	gorm.Model
 	McIgn string
 	TgUsn string
+	LastGameMode string
+	DidUserAuth bool
 }
 
 type onlinePlayer struct {
@@ -57,7 +59,7 @@ func setupAuthCommands(b *tb.Bot, db *gorm.DB, stdin io.WriteCloser) {
 						b.Reply(m, "Your account will be un-linked from `"+oldIgn+"` and linked to `"+ign+"`. To confirm this action, use:\n\n`/link "+ign+" confirm`", "Markdown")
 					}
 				} else {
-					db.Create(&player{McIgn: ign, TgUsn: m.Sender.Username})
+					db.Create(&player{McIgn: ign, TgUsn: m.Sender.Username, LastGameMode: "survival",DidUserAuth: false})
 					b.Reply(m, "The Minecraft IGN `"+ign+"` has been successfully linked to the telegram account `@"+m.Sender.Username+"`!", "Markdown")
 				}
 			}
@@ -80,8 +82,18 @@ func setupAuthCommands(b *tb.Bot, db *gorm.DB, stdin io.WriteCloser) {
 					if linked.TgUsn == m.Sender.Username {
 						b.Reply(m, "You have successfully authenticated yourself as `"+linked.McIgn+"`!", "Markdown")
 						authOnlinePlayer(linked.McIgn)
+
 						io.WriteString(stdin, "effect clear "+linked.McIgn+" blindness\n")
-						io.WriteString(stdin, "gamemode survival "+linked.McIgn+"\n")
+
+						if linked.DidUserAuth {
+							// if user is authenticated set gametype to previous game type
+							io.WriteString(stdin, "gamemode "+linked.LastGameMode+" "+linked.McIgn+"\n")
+						}else{
+							// if user disconnects during un-authenticated mode, set user gametype to survival
+							io.WriteString(stdin, "gamemode survival "+linked.McIgn+"\n")
+						}
+
+						db.Model(&linked).Update("did_user_auth",true)
 					} else {
 						b.Reply(m, "This Telegram account is not linked to the IGN `"+linked.McIgn+"`!", "Markdown")
 					}
