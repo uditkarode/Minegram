@@ -18,4 +18,5 @@ var entityPosRegex = regexp.MustCompile(`: .+ has the following entity data: \[(
 var simplifiedEPRegex = regexp.MustCompile(`: .+ has the following entity data: \[(.+)\..*d, (.+)\..*d, (.+)\..*d\]`)
 var simpleOutputRegex = regexp.MustCompile(`.*: (.+)`)
 var dimensionRegex = regexp.MustCompile(`.*has the following entity data: "(minecraft:.+)"`)
+var gameTypeRegex = regexp.MustCompile(`.*has the following entity data: (.+)`)
 var genericOutputRegex = regexp.MustCompile(`(\[.+\]) (\[.+\]): (.+)`)

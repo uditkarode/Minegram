@@ -100,7 +100,7 @@ func main() {
 	}
 
 	execCmd.SysProcAttr = &syscall.SysProcAttr{
-		Setpgid: true,
+		//Setpgid: true,
 	}
 
 	go func() {
@@ -365,13 +365,25 @@ func main() {
 								}
 								_, _ = b.Send(targetChat, toSend, "Markdown")
 								if authEnabled {
+									var currentUser player
+									db.First(&currentUser, "mc_ign = ?", user)
+
 									startCoords := cliExec(stdin, "data get entity "+user+" Pos")
 									coords := entityPosRegex.FindStringSubmatch(startCoords)
 
 									dimensionStr := cliExec(stdin, "data get entity "+user+" Dimension")
 									dimension := dimensionRegex.FindStringSubmatch(dimensionStr)
 
+									gameTypeStr := cliExec(stdin, "data get entity "+user+" playerGameType")
+									rGameType := gameTypeRegex.FindStringSubmatch(gameTypeStr)
+
+									gameType := getGameType(rGameType[1])
+
+									db.Model(&currentUser).Update("last_game_mode", gameType)
+									db.Model(&currentUser).Update("did_user_auth", false)
+
 									_, _ = io.WriteString(stdin, "effect give "+user+" minecraft:blindness 999999\n")
+									_, _ = io.WriteString(stdin, "effect give "+user+" minecraft:slowness 1000000 255\n")
 									_, _ = io.WriteString(stdin, "gamemode spectator "+user+"\n")
 									_, _ = io.WriteString(stdin, "tellraw "+user+" [\"\",{\"text\":\"If you haven't linked before, send \"},{\"text\":\"/link "+newPlayer.inGameName+" \",\"color\":\"green\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"},{\"text\":\"\\nIf you have \"},{\"text\":\"linked \",\"color\":\"green\"},{\"text\":\"your account, send \"},{\"text\":\"/auth \",\"color\":\"aqua\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"}]\n")
 
