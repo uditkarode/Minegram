@@ -84,7 +84,6 @@ func setupAuthCommands(b *tb.Bot, db *gorm.DB, stdin io.WriteCloser) {
 						authOnlinePlayer(linked.McIgn)
 
 						io.WriteString(stdin, "effect clear "+linked.McIgn+" blindness\n")
-						io.WriteString(stdin, "effect clear "+linked.McIgn+" slowness\n")
 
 						if linked.DidUserAuth {
 							// if user is authenticated set gametype to previous game type
