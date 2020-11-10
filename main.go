@@ -19,15 +19,31 @@ import (
 	"gorm.io/gorm"
 )
 
-var lastLine = make(chan string)
-var online = []onlinePlayer{}
+/* configuration options */
+var cmd string
+var tok string
+var tchat string
+var admUsers []string
 var authEnabled = true
+
+/* shared vars */
+var online = []onlinePlayer{}
+var lastLine string
+var cliOutput = make(chan string)
 var needResult = false
+
+var db *gorm.DB
+var b *tb.Bot
+var execCmd *exec.Cmd
+var stdin io.WriteCloser
+
+/* shared error */
+var err error
 
 func main() {
 	res := readConfig("config.ini")
 
-	db, err := gorm.Open(sqlite.Open("minegram.db"), &gorm.Config{})
+	db, err = gorm.Open(sqlite.Open("minegram.db"), &gorm.Config{})
 
 	if err != nil {
 		panic("failed to connect database")
@@ -35,9 +51,9 @@ func main() {
 
 	_ = db.AutoMigrate(&player{})
 
-	cmd := res["command"]
-	tok := res["bot_token"]
-	tchat := res["target_chat"]
+	cmd = res["command"]
+	tok = res["bot_token"]
+	tchat = res["target_chat"]
 	admUsersRaw := res["admin_usernames"]
 	authEnabledRaw := res["auth_enabled"]
 
@@ -69,31 +85,32 @@ func main() {
 		authEnabled = false
 	}
 
-	admUsers := strings.Split(admUsersRaw, ",")
+	admUsers = strings.Split(admUsersRaw, ",")
 
 	var targetChat tb.Recipient
 	targetChat = group{id: tchat}
 
-	b, errz := tb.NewBot(tb.Settings{
+	b, err = tb.NewBot(tb.Settings{
 		Token:  tok,
 		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
 	})
 
-	if errz != nil {
-		panic(errz)
-	}
-
-	splitCmd := strings.Split(cmd, " ")
-
-	execCmd := exec.Command(splitCmd[0], splitCmd[1:]...)
-	execCmd.Stderr = os.Stderr
-
-	stdin, err := execCmd.StdinPipe()
 	if err != nil {
 		panic(err)
 	}
 
-	stdout, err := execCmd.StdoutPipe()
+	splitCmd := strings.Split(cmd, " ")
+
+	execCmd = exec.Command(splitCmd[0], splitCmd[1:]...)
+	execCmd.Stderr = os.Stderr
+
+	stdin, err = execCmd.StdinPipe()
+	if err != nil {
+		panic(err)
+	}
+
+	var stdout io.ReadCloser
+	stdout, err = execCmd.StdoutPipe()
 	if err != nil {
 		panic(err)
 	}
@@ -150,7 +167,8 @@ func main() {
 		output := cliExec(stdin, "time query daytime")
 		result := timeRegex.FindStringSubmatch(output)
 		if len(result) == 2 {
-			tick, err := strconv.Atoi(result[1])
+			var tick int
+			tick, err = strconv.Atoi(result[1])
 			if err == nil {
 				secondsPassed := int(float64(tick) * 3.6)
 				minutesPassed := 0
@@ -296,11 +314,11 @@ func main() {
 
 	scanner := bufio.NewScanner(stdout)
 	for scanner.Scan() {
-		m := scanner.Text()
+		lastLine = scanner.Text()
 
-		if strings.Contains(m, "INFO") {
-			if genericOutputRegex.MatchString(m) {
-				toLog := genericOutputRegex.FindStringSubmatch(m)
+		if strings.Contains(lastLine, "INFO") {
+			if genericOutputRegex.MatchString(lastLine) {
+				toLog := genericOutputRegex.FindStringSubmatch(lastLine)
 				if len(toLog) == 4 {
 					color.Set(color.FgYellow)
 					fmt.Print(toLog[1] + " ")
@@ -312,14 +330,14 @@ func main() {
 
 					fmt.Print("\n")
 				} else {
-					fmt.Println(m)
+					fmt.Println(lastLine)
 				}
 			} else {
-				fmt.Println(m)
+				fmt.Println(lastLine)
 			}
-		} else if strings.Contains(m, "WARN") {
-			if genericOutputRegex.MatchString(m) {
-				toLog := genericOutputRegex.FindStringSubmatch(m)
+		} else if strings.Contains(lastLine, "WARN") {
+			if genericOutputRegex.MatchString(lastLine) {
+				toLog := genericOutputRegex.FindStringSubmatch(lastLine)
 				if len(toLog) == 4 {
 					color.Set(color.FgYellow)
 					fmt.Print(toLog[1] + " ")
@@ -331,28 +349,28 @@ func main() {
 
 					fmt.Print("\n")
 				} else {
-					fmt.Println(m)
+					fmt.Println(lastLine)
 				}
 			} else {
-				fmt.Println(m)
+				fmt.Println(lastLine)
 			}
 		} else {
-			fmt.Println(m)
+			fmt.Println(lastLine)
 		}
 
 		if needResult {
-			lastLine <- m
+			cliOutput <- lastLine
 			needResult = false
 		} else {
 			go func() {
-				if strings.Contains(m, "INFO") {
-					if chatRegex.MatchString(m) {
-						result := chatRegex.FindStringSubmatch(m)
+				if strings.Contains(lastLine, "INFO") {
+					if chatRegex.MatchString(lastLine) {
+						result := chatRegex.FindStringSubmatch(lastLine)
 						if len(result) == 3 {
 							_, _ = b.Send(targetChat, "`"+result[1]+"`"+"**:** "+result[2], "Markdown")
 						}
-					} else if joinRegex.MatchString(m) || joinRegexSpigotPaper.MatchString(m) {
-						result := joinRegex.FindStringSubmatch(m)
+					} else if joinRegex.MatchString(lastLine) || joinRegexSpigotPaper.MatchString(lastLine) {
+						result := joinRegex.FindStringSubmatch(lastLine)
 						if len(result) == 2 {
 							user := result[1]
 							if !containsPlayer(online, user) {
@@ -403,19 +421,19 @@ func main() {
 								}
 							}
 						}
-					} else if leaveRegex.MatchString(m) {
-						result := leaveRegex.FindStringSubmatch(m)
+					} else if leaveRegex.MatchString(lastLine) {
+						result := leaveRegex.FindStringSubmatch(lastLine)
 						if len(result) == 2 {
 							online = removePlayer(online, result[1])
 							_, _ = b.Send(targetChat, "`"+result[1]+"`"+" has left the server.", "Markdown")
 						}
-					} else if advancementRegex.MatchString(m) {
-						result := advancementRegex.FindStringSubmatch(m)
+					} else if advancementRegex.MatchString(lastLine) {
+						result := advancementRegex.FindStringSubmatch(lastLine)
 						if len(result) == 3 {
 							_, _ = b.Send(targetChat, "`"+result[1]+"`"+" has made the advancement `"+result[2]+"`.", "Markdown")
 						}
-					} else if deathRegex.MatchString(m) {
-						result := simpleOutputRegex.FindStringSubmatch(m)
+					} else if deathRegex.MatchString(lastLine) {
+						result := simpleOutputRegex.FindStringSubmatch(lastLine)
 						if len(result) == 2 {
 							sep := strings.Split(result[1], " ")
 							startCoords := cliExec(stdin, "data get entity "+sep[0]+" Pos")
@@ -426,7 +444,7 @@ func main() {
 							}
 							_, _ = b.Send(targetChat, toSend+".", "Markdown")
 						}
-					} else if strings.Contains(m, "For help, type") {
+					} else if strings.Contains(lastLine, "For help, type") {
 						cliExec(stdin, "say Server initialised!")
 					}
 				}

@@ -29,5 +29,5 @@ func itsTwoDigit(s int) string {
 func cliExec(stdin io.WriteCloser, cmd string) string {
 	needResult = true
 	io.WriteString(stdin, cmd+"\n")
-	return <-lastLine
+	return <-cliOutput
 }
