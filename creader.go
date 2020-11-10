@@ -23,8 +23,8 @@ func readConfig(fileName string) map[string]string {
 
 	for scanner.Scan() {
 		split := strings.Split(scanner.Text(), "=")
-		if len(split) == 2 {
-			res[strings.ReplaceAll(split[0], " ", "")] = startSpace.ReplaceAllString(split[1], "")
+		if len(split) > 1 {
+			res[strings.ReplaceAll(split[0], " ", "")] = startSpace.ReplaceAllString(strings.Join(split[1:], "="), "")
 		}
 	}
 	return res
