@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"reflect"
+	"runtime"
 	"strings"
 	"time"
 
@@ -41,11 +43,13 @@ var targetChat tb.Recipient
 var err error
 
 func plugModule(mf utils.ModuleFunction) {
+	color.Blue("LOADING MODULE: " + runtime.FuncForPC(reflect.ValueOf(mf).Pointer()).Name())
 	mf(utils.ModuleData{&cmd, &tok, &admUsers, &authEnabled, &online, &lastLine, &cliOutput, &needResult, &db, &b, &execCmd, &stdin, &stdout, &targetChat})
 }
 
 func main() {
 	plugModule(modules.Core)
+	plugModule(modules.TgUtilCommands)
 
 	setupAuthCommands(b, db, stdin)
 

@@ -80,7 +80,7 @@ func TgUtilCommands(data utils.ModuleData) {
 					emojiStr = "🌃 <i>Night</i>"
 				}
 
-				timeStr := emojiStr + "\n<(*data.Bot)>Time</(*data.Bot)>: <code> "
+				timeStr := emojiStr + "\n<b>Time</b>:<code> "
 
 				if hoursPassed < 12 {
 					timeStr += utils.ItsTwoDigit(hoursPassed) + ":" + utils.ItsTwoDigit(minutesPassed) + " AM</code>"
@@ -88,7 +88,7 @@ func TgUtilCommands(data utils.ModuleData) {
 					timeStr += utils.ItsTwoDigit(hoursPassed-12) + ":" + utils.ItsTwoDigit(minutesPassed) + " PM</code>"
 				}
 
-				timeStr += "\n<(*data.Bot)>Ticks</(*data.Bot)>: <code>" + utils.Its(tick) + "</code>"
+				timeStr += "\n<b>Ticks</b>: <code>" + utils.Its(tick) + "</code>"
 				_, err = (*data.Bot).Send(*data.TargetChat, timeStr, "HTML")
 				if err != nil {
 					fmt.Println(err)
