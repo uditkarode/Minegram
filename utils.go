@@ -5,14 +5,6 @@ import (
 	"strconv"
 )
 
-type group struct {
-	id string
-}
-
-func (g group) Recipient() string {
-	return g.id
-}
-
 func its(s int) string {
 	return strconv.Itoa(s)
 }

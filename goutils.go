@@ -1,8 +1,10 @@
 package main
 
-func removePlayer(s []onlinePlayer, r string) []onlinePlayer {
+import "Minegram/utils"
+
+func removePlayer(s []utils.OnlinePlayer, r string) []utils.OnlinePlayer {
 	for i, v := range s {
-		if v.inGameName == r {
+		if v.InGameName == r {
 			return append(s[:i], s[i+1:]...)
 		}
 	}
@@ -18,9 +20,9 @@ func contains(s []string, e string) bool {
 	return false
 }
 
-func containsPlayer(s []onlinePlayer, e string) bool {
+func containsPlayer(s []utils.OnlinePlayer, e string) bool {
 	for _, a := range s {
-		if a.inGameName == e {
+		if a.InGameName == e {
 			return true
 		}
 	}
@@ -41,19 +43,19 @@ func getGameType(gtype string) string {
 		return "survival"
 	}
 }
-func getOnlinePlayer(ign string) onlinePlayer {
+func getOnlinePlayer(ign string) utils.OnlinePlayer {
 	for _, player := range online {
-		if player.inGameName == ign {
+		if player.InGameName == ign {
 			return player
 		}
 	}
-	return onlinePlayer{}
+	return utils.OnlinePlayer{}
 }
 
 func authOnlinePlayer(ign string) {
 	for i, player := range online {
-		if player.inGameName == ign {
-			online[i].isAuthd = true
+		if player.InGameName == ign {
+			online[i].IsAuthd = true
 			break
 		}
 	}

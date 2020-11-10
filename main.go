@@ -11,6 +11,9 @@ import (
 	"strings"
 	"time"
 
+	"Minegram/modules"
+	"Minegram/utils"
+
 	"github.com/fatih/color"
 
 	tb "gopkg.in/tucnak/telebot.v2"
@@ -20,16 +23,14 @@ import (
 /* configuration options */
 var cmd string
 var tok string
-var tchat string
 var admUsers []string
 var authEnabled = true
 
 /* shared vars */
-var online = []onlinePlayer{}
+var online = []utils.OnlinePlayer{}
 var lastLine string
 var cliOutput = make(chan string)
 var needResult = false
-
 var db *gorm.DB
 var b *tb.Bot
 var execCmd *exec.Cmd
@@ -40,8 +41,12 @@ var targetChat tb.Recipient
 /* shared error */
 var err error
 
+func plugModule(mf utils.ModuleFunction) {
+	mf(utils.ModuleData{&cmd, &tok, &admUsers, &authEnabled, &online, &lastLine, &cliOutput, &needResult, &db, &b, &execCmd, &stdin, &stdout, &targetChat})
+}
+
 func main() {
-	initPhase()
+	plugModule(modules.Core)
 
 	b.Handle("/list", func(m *tb.Message) {
 		onlen := len(online)
@@ -53,7 +58,7 @@ func main() {
 		}
 
 		for _, player := range online {
-			res += "\n- `" + player.inGameName + "`"
+			res += "\n- `" + player.InGameName + "`"
 		}
 		_, _ = b.Send(targetChat, res, "Markdown")
 	})
@@ -284,7 +289,7 @@ func main() {
 						if len(result) == 2 {
 							user := result[1]
 							if !containsPlayer(online, user) {
-								newPlayer := onlinePlayer{inGameName: user, isAuthd: false}
+								newPlayer := utils.OnlinePlayer{InGameName: user, IsAuthd: false}
 								online = append(online, newPlayer)
 								toSend := "`" + user + "`" + " joined the server."
 								if authEnabled {
@@ -292,7 +297,7 @@ func main() {
 								}
 								_, _ = b.Send(targetChat, toSend, "Markdown")
 								if authEnabled {
-									var currentUser player
+									var currentUser utils.Player
 									db.First(&currentUser, "mc_ign = ?", user)
 
 									startCoords := cliExec(stdin, "data get entity "+user+" Pos")
@@ -311,14 +316,13 @@ func main() {
 
 									_, _ = io.WriteString(stdin, "effect give "+user+" minecraft:blindness 999999\n")
 									_, _ = io.WriteString(stdin, "gamemode spectator "+user+"\n")
-									_, _ = io.WriteString(stdin, "tellraw "+user+" [\"\",{\"text\":\"If you haven't linked before, send \"},{\"text\":\"/link "+newPlayer.inGameName+" \",\"color\":\"green\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"},{\"text\":\"\\nIf you have \"},{\"text\":\"linked \",\"color\":\"green\"},{\"text\":\"your account, send \"},{\"text\":\"/auth \",\"color\":\"aqua\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"}]\n")
+									_, _ = io.WriteString(stdin, "tellraw "+user+" [\"\",{\"text\":\"If you haven't linked before, send \"},{\"text\":\"/link "+newPlayer.InGameName+" \",\"color\":\"green\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"},{\"text\":\"\\nIf you have \"},{\"text\":\"linked \",\"color\":\"green\"},{\"text\":\"your account, send \"},{\"text\":\"/auth \",\"color\":\"aqua\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"}]\n")
 
 									if len(coords) == 4 {
 										if len(dimension) == 2 {
 											for {
 												player := getOnlinePlayer(user)
-												fmt.Println(player)
-												if player.isAuthd || player.inGameName == "" {
+												if player.IsAuthd || player.InGameName == "" {
 													break
 												} else {
 													command := "execute in " + dimension[1] + " run tp " + user + " " + coords[1] + " " + coords[2] + " " + coords[3] + "\n"

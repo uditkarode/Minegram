@@ -1,6 +1,7 @@
-package main
+package modules
 
 import (
+	"Minegram/utils"
 	"bufio"
 	"fmt"
 	"io"
@@ -15,29 +16,30 @@ import (
 	"gorm.io/gorm"
 )
 
-func initPhase() {
+func Core(data utils.ModuleData) {
 	fmt.Println("Initialising Minegram...")
-	res := readConfig("config.ini")
+	res := utils.ReadConfig("config.ini")
 
-	db, err = gorm.Open(sqlite.Open("minegram.db"), &gorm.Config{})
+	*data.Db, err = gorm.Open(sqlite.Open("minegram.db"), &gorm.Config{})
 
 	if err != nil {
 		panic("failed to connect database")
 	}
 
-	_ = db.AutoMigrate(&player{})
+	_ = (*data.Db).AutoMigrate(&utils.Player{})
 
-	cmd = res["command"]
-	tok = res["bot_token"]
-	tchat = res["target_chat"]
+	*data.Cmd = res["command"]
+	*data.Tok = res["bot_token"]
+	tchat := res["target_chat"]
 	admUsersRaw := res["admin_usernames"]
 	authEnabledRaw := res["auth_enabled"]
 
-	if cmd == "" {
+	if *data.Cmd == "" {
 		fmt.Println("Please enter a 'command' in the config!")
 		os.Exit(0)
 	}
-	if tok == "" {
+
+	if *data.Tok == "" {
 		fmt.Println("Please enter a 'bot_token' in the config!")
 		os.Exit(0)
 	}
@@ -58,15 +60,15 @@ func initPhase() {
 	}
 
 	if authEnabledRaw != "true" {
-		authEnabled = false
+		*data.AuthEnabled = false
 	}
 
-	admUsers = strings.Split(admUsersRaw, ",")
+	*data.AdmUsers = strings.Split(admUsersRaw, ",")
 
-	targetChat = group{id: tchat}
+	*data.TargetChat = utils.Group{Id: tchat}
 
-	b, err = tb.NewBot(tb.Settings{
-		Token:  tok,
+	*data.Bot, err = tb.NewBot(tb.Settings{
+		Token:  *data.Tok,
 		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
 	})
 
@@ -74,34 +76,34 @@ func initPhase() {
 		panic(err)
 	}
 
-	splitCmd := strings.Split(cmd, " ")
-	execCmd = exec.Command(splitCmd[0], splitCmd[1:]...)
+	splitCmd := strings.Split(*data.Cmd, " ")
+	*data.ExecCmd = exec.Command(splitCmd[0], splitCmd[1:]...)
 
-	execCmd.Stderr = os.Stderr
+	(*data.ExecCmd).Stderr = os.Stderr
 
-	stdin, err = execCmd.StdinPipe()
+	*data.Stdin, err = (*data.ExecCmd).StdinPipe()
 	if err != nil {
 		panic(err)
 	}
 
-	stdout, err = execCmd.StdoutPipe()
+	*data.Stdout, err = (*data.ExecCmd).StdoutPipe()
 	if err != nil {
 		panic(err)
 	}
 
-	execCmd.SysProcAttr = &syscall.SysProcAttr{
+	(*data.ExecCmd).SysProcAttr = &syscall.SysProcAttr{
 		Setpgid: true,
 	}
 
 	go func() {
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
-			_, err = io.WriteString(stdin, scanner.Text()+"\n")
+			_, err = io.WriteString(*data.Stdin, scanner.Text()+"\n")
 		}
 	}()
 
-	fmt.Println("Executing '" + cmd + "'...")
-	err = execCmd.Start()
+	fmt.Println("Executing '" + *data.Cmd + "'...")
+	err = (*data.ExecCmd).Start()
 
 	if err != nil {
 		panic(err)

@@ -4,23 +4,11 @@ import (
 	"io"
 	"strings"
 
+	"Minegram/utils"
+
 	tb "gopkg.in/tucnak/telebot.v2"
 	"gorm.io/gorm"
 )
-
-type player struct {
-	gorm.Model
-	McIgn string
-	TgUsn string
-	LastGameMode string
-	DidUserAuth bool
-}
-
-type onlinePlayer struct {
-	inGameName  string
-	startCoords string
-	isAuthd     bool
-}
 
 func setupAuthCommands(b *tb.Bot, db *gorm.DB, stdin io.WriteCloser) {
 	b.Handle("/link", func(m *tb.Message) {
@@ -35,7 +23,7 @@ func setupAuthCommands(b *tb.Bot, db *gorm.DB, stdin io.WriteCloser) {
 			var plSplit = strings.Split(m.Payload, " ")
 			ign := plSplit[0]
 
-			var existing player
+			var existing utils.Player
 			db.First(&existing, "mc_ign = ?", ign)
 			if existing.McIgn != "" {
 				if existing.TgUsn == m.Sender.Username {
@@ -44,7 +32,7 @@ func setupAuthCommands(b *tb.Bot, db *gorm.DB, stdin io.WriteCloser) {
 					b.Reply(m, "This IGN has already been linked to a different Telegram account!")
 				}
 			} else {
-				var existingUsn player
+				var existingUsn utils.Player
 				db.First(&existingUsn, "tg_usn = ?", m.Sender.Username)
 				if existingUsn.TgUsn != "" {
 					oldIgn := existingUsn.McIgn
@@ -59,7 +47,7 @@ func setupAuthCommands(b *tb.Bot, db *gorm.DB, stdin io.WriteCloser) {
 						b.Reply(m, "Your account will be un-linked from `"+oldIgn+"` and linked to `"+ign+"`. To confirm this action, use:\n\n`/link "+ign+" confirm`", "Markdown")
 					}
 				} else {
-					db.Create(&player{McIgn: ign, TgUsn: m.Sender.Username, LastGameMode: "survival",DidUserAuth: false})
+					db.Create(&utils.Player{McIgn: ign, TgUsn: m.Sender.Username, LastGameMode: "survival", DidUserAuth: false})
 					b.Reply(m, "The Minecraft IGN `"+ign+"` has been successfully linked to the telegram account `@"+m.Sender.Username+"`!", "Markdown")
 				}
 			}
@@ -75,7 +63,7 @@ func setupAuthCommands(b *tb.Bot, db *gorm.DB, stdin io.WriteCloser) {
 		if m.Payload != "" {
 			b.Reply(m, "`auth` does not take any arguments.", "Markdown")
 		} else {
-			var linked player
+			var linked utils.Player
 			db.First(&linked, "tg_usn = ?", m.Sender.Username)
 			if linked.McIgn != "" {
 				if containsPlayer(online, linked.McIgn) {
@@ -88,12 +76,12 @@ func setupAuthCommands(b *tb.Bot, db *gorm.DB, stdin io.WriteCloser) {
 						if linked.DidUserAuth {
 							// if user is authenticated set gametype to previous game type
 							io.WriteString(stdin, "gamemode "+linked.LastGameMode+" "+linked.McIgn+"\n")
-						}else{
+						} else {
 							// if user disconnects during un-authenticated mode, set user gametype to survival
 							io.WriteString(stdin, "gamemode survival "+linked.McIgn+"\n")
 						}
 
-						db.Model(&linked).Update("did_user_auth",true)
+						db.Model(&linked).Update("did_user_auth", true)
 					} else {
 						b.Reply(m, "This Telegram account is not linked to the IGN `"+linked.McIgn+"`!", "Markdown")
 					}
