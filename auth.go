@@ -66,10 +66,10 @@ func setupAuthCommands(b *tb.Bot, db *gorm.DB, stdin io.WriteCloser) {
 			var linked utils.Player
 			db.First(&linked, "tg_usn = ?", m.Sender.Username)
 			if linked.McIgn != "" {
-				if containsPlayer(online, linked.McIgn) {
+				if utils.ContainsPlayer(online, linked.McIgn) {
 					if linked.TgUsn == m.Sender.Username {
 						b.Reply(m, "You have successfully authenticated yourself as `"+linked.McIgn+"`!", "Markdown")
-						authOnlinePlayer(linked.McIgn)
+						utils.AuthOnlinePlayer(linked.McIgn, online)
 
 						io.WriteString(stdin, "effect clear "+linked.McIgn+" blindness\n")
 

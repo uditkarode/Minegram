@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"strconv"
 	"strings"
 	"time"
 
@@ -48,95 +47,7 @@ func plugModule(mf utils.ModuleFunction) {
 func main() {
 	plugModule(modules.Core)
 
-	b.Handle("/list", func(m *tb.Message) {
-		onlen := len(online)
-		res := "`" + strconv.Itoa(onlen)
-		if onlen == 1 {
-			res = res + "` player online\n"
-		} else {
-			res = res + "` players online\n"
-		}
-
-		for _, player := range online {
-			res += "\n- `" + player.InGameName + "`"
-		}
-		_, _ = b.Send(targetChat, res, "Markdown")
-	})
-
-	b.Handle("/cli", func(m *tb.Message) {
-		if contains(admUsers, m.Sender.Username) {
-			if m.Payload == "" {
-				_, _ = b.Reply(m, "Enter a command to execute!")
-			} else {
-				output := cliExec(stdin, m.Payload)
-				_, _ = b.Reply(m, "`"+output+"`", "Markdown")
-			}
-		} else {
-			_, _ = b.Reply(m, "You are not authorised to use this command!")
-		}
-	})
-
 	setupAuthCommands(b, db, stdin)
-
-	b.Handle("/time", func(m *tb.Message) {
-		output := cliExec(stdin, "time query daytime")
-		result := timeRegex.FindStringSubmatch(output)
-		if len(result) == 2 {
-			var tick int
-			tick, err = strconv.Atoi(result[1])
-			if err == nil {
-				secondsPassed := int(float64(tick) * 3.6)
-				minutesPassed := 0
-				hoursPassed := 0
-
-				if secondsPassed > 60 {
-					minutesPassed = secondsPassed / 60
-					secondsPassed = secondsPassed % 60
-				}
-
-				if minutesPassed > 60 {
-					hoursPassed = minutesPassed / 60
-					minutesPassed = minutesPassed % 60
-				}
-
-				hoursPassed += 6
-
-				var emojiStr string
-
-				if hoursPassed >= 24 {
-					hoursPassed -= 24
-				}
-
-				if hoursPassed >= 0 && hoursPassed < 6 {
-					emojiStr = "🌌 <i>Midnight</i>"
-				} else if hoursPassed >= 6 && hoursPassed < 7 {
-					emojiStr = "🌄 <i>Early Morning</i>"
-				} else if hoursPassed >= 7 && hoursPassed < 12 {
-					emojiStr = "🌅 <i>Day</i>"
-				} else if hoursPassed >= 12 && hoursPassed < 17 {
-					emojiStr = "🌇 <i>Noon</i>"
-				} else if hoursPassed >= 17 && hoursPassed < 19 {
-					emojiStr = "🌅 <i>Evening</i>"
-				} else if hoursPassed >= 19 && hoursPassed < 24 {
-					emojiStr = "🌃 <i>Night</i>"
-				}
-
-				timeStr := emojiStr + "\n<b>Time</b>: <code> "
-
-				if hoursPassed < 12 {
-					timeStr += itsTwoDigit(hoursPassed) + ":" + itsTwoDigit(minutesPassed) + " AM</code>"
-				} else {
-					timeStr += itsTwoDigit(hoursPassed-12) + ":" + itsTwoDigit(minutesPassed) + " PM</code>"
-				}
-
-				timeStr += "\n<b>Ticks</b>: <code>" + its(tick) + "</code>"
-				_, err = b.Send(targetChat, timeStr, "HTML")
-				if err != nil {
-					fmt.Println(err)
-				}
-			}
-		}
-	})
 
 	b.Handle(tb.OnText, func(m *tb.Message) {
 		if len(online) > 0 {
@@ -288,7 +199,7 @@ func main() {
 						result := joinRegex.FindStringSubmatch(lastLine)
 						if len(result) == 2 {
 							user := result[1]
-							if !containsPlayer(online, user) {
+							if !utils.ContainsPlayer(online, user) {
 								newPlayer := utils.OnlinePlayer{InGameName: user, IsAuthd: false}
 								online = append(online, newPlayer)
 								toSend := "`" + user + "`" + " joined the server."
@@ -300,16 +211,16 @@ func main() {
 									var currentUser utils.Player
 									db.First(&currentUser, "mc_ign = ?", user)
 
-									startCoords := cliExec(stdin, "data get entity "+user+" Pos")
+									startCoords := utils.CliExec(stdin, "data get entity "+user+" Pos", &needResult, cliOutput)
 									coords := entityPosRegex.FindStringSubmatch(startCoords)
 
-									dimensionStr := cliExec(stdin, "data get entity "+user+" Dimension")
+									dimensionStr := utils.CliExec(stdin, "data get entity "+user+" Dimension", &needResult, cliOutput)
 									dimension := dimensionRegex.FindStringSubmatch(dimensionStr)
 
-									gameTypeStr := cliExec(stdin, "data get entity "+user+" playerGameType")
+									gameTypeStr := utils.CliExec(stdin, "data get entity "+user+" playerGameType", &needResult, cliOutput)
 									rGameType := gameTypeRegex.FindStringSubmatch(gameTypeStr)
 
-									gameType := getGameType(rGameType[1])
+									gameType := utils.GetGameType(rGameType[1])
 
 									db.Model(&currentUser).Update("last_game_mode", gameType)
 									db.Model(&currentUser).Update("did_user_auth", false)
@@ -321,7 +232,7 @@ func main() {
 									if len(coords) == 4 {
 										if len(dimension) == 2 {
 											for {
-												player := getOnlinePlayer(user)
+												player := utils.GetOnlinePlayer(user, online)
 												if player.IsAuthd || player.InGameName == "" {
 													break
 												} else {
@@ -338,7 +249,7 @@ func main() {
 					} else if leaveRegex.MatchString(lastLine) {
 						result := leaveRegex.FindStringSubmatch(lastLine)
 						if len(result) == 2 {
-							online = removePlayer(online, result[1])
+							online = utils.RemovePlayer(online, result[1])
 							_, _ = b.Send(targetChat, "`"+result[1]+"`"+" has left the server.", "Markdown")
 						}
 					} else if advancementRegex.MatchString(lastLine) {
@@ -350,7 +261,7 @@ func main() {
 						result := simpleOutputRegex.FindStringSubmatch(lastLine)
 						if len(result) == 2 {
 							sep := strings.Split(result[1], " ")
-							startCoords := cliExec(stdin, "data get entity "+sep[0]+" Pos")
+							startCoords := utils.CliExec(stdin, "data get entity "+sep[0]+" Pos", &needResult, cliOutput)
 							coords := simplifiedEPRegex.FindStringSubmatch(startCoords)
 							toSend := "`" + sep[0] + "` " + strings.Join(sep[1:], " ")
 							if len(coords) == 4 {
@@ -359,7 +270,7 @@ func main() {
 							_, _ = b.Send(targetChat, toSend+".", "Markdown")
 						}
 					} else if strings.Contains(lastLine, "For help, type") {
-						cliExec(stdin, "say Server initialised!")
+						utils.CliExec(stdin, "say Server initialised!", &needResult, cliOutput)
 					}
 				}
 			}()
