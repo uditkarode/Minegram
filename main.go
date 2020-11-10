@@ -25,7 +25,7 @@ var authEnabled = true
 var needResult = false
 
 func main() {
-	res := readConfig("config")
+	res := readConfig("config.ini")
 
 	db, err := gorm.Open(sqlite.Open("minegram.db"), &gorm.Config{})
 
@@ -45,7 +45,6 @@ func main() {
 		fmt.Println("Please enter a 'command' in the config!")
 		os.Exit(0)
 	}
-
 	if tok == "" {
 		fmt.Println("Please enter a 'bot_token' in the config!")
 		os.Exit(0)

@@ -1,31 +1,21 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"io/ioutil"
-	"path/filepath"
-	"regexp"
-	"strings"
+	"gopkg.in/ini.v1"
+	"os"
 )
 
 func readConfig(fileName string) map[string]string {
-	filename, _ := filepath.Abs(fileName)
-	confFile, err := ioutil.ReadFile(filename)
-	startSpace := regexp.MustCompile(`^\s`)
-	res := make(map[string]string)
-
+	cfg, err := ini.Load(fileName)
 	if err != nil {
-		fmt.Println("Could not open " + fileName)
+		fmt.Printf("Fail to read file: %v", err)
+		os.Exit(1)
 	}
-
-	scanner := bufio.NewScanner(strings.NewReader(string(confFile)))
-
-	for scanner.Scan() {
-		split := strings.Split(scanner.Text(), "=")
-		if len(split) == 2 {
-			res[strings.ReplaceAll(split[0], " ", "")] = startSpace.ReplaceAllString(split[1], "")
-		}
+	res := make(map[string]string)
+	keys := cfg.Section("").KeyStrings()
+	for _, j := range keys{
+		res[j] = cfg.Section("").Key(j).String()
 	}
 	return res
 }
