@@ -20,10 +20,9 @@ Then just execute the binary: `./Minegram` and you're set!
 Compiling from source is very easy:  
   
 ```bash
-go get -u gopkg.in/tucnak/telebot.v2
-go get -u gorm.io/gorm
-go get -u gorm.io/driver/sqlite
-go get -u github.com/fatih/color
+git clone https://github.com/uditkarode/Minegram.git
+cd Minegram
+go get -u
 go build
 ```
 # More Examples
