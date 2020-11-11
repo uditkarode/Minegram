@@ -8,6 +8,10 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
+// TgToMc module
+// Sends messages from Telegram
+// to Minecraft with support
+// for replies.
 func TgToMc(data utils.ModuleData) {
 	(*data.Bot).Handle(tb.OnText, func(m *tb.Message) {
 		if len(*data.Online) > 0 {

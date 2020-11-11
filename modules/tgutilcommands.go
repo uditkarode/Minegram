@@ -8,6 +8,10 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
+// TgUtilCommands module
+// Sets up the utility
+// commands that can be used
+// from Telegram as /command
 func TgUtilCommands(data utils.ModuleData) {
 	(*data.Bot).Handle("/list", func(m *tb.Message) {
 		onlen := len(*data.Online)

@@ -26,6 +26,9 @@ var dimensionRegex = regexp.MustCompile(`.*has the following entity data: "(mine
 var gameTypeRegex = regexp.MustCompile(`.*has the following entity data: (.+)`)
 var genericOutputRegex = regexp.MustCompile(`(\[.+\]) (\[.+\]): (.+)`)
 
+// Parser module
+// Parses Minecraft server cli
+// log and acts as necessary
 func Parser(data utils.ModuleData) {
 	scanner := bufio.NewScanner(*data.Stdout)
 	go func() {

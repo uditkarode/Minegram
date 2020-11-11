@@ -24,7 +24,6 @@ var authEnabled = true
 
 /* shared vars */
 var online = []utils.OnlinePlayer{}
-var lastLine string
 var cliOutput = make(chan string)
 var needResult = false
 var db *gorm.DB
@@ -40,7 +39,12 @@ var err error
 
 func plugModule(mf utils.ModuleFunction) {
 	color.Blue("LOADING MODULE: " + runtime.FuncForPC(reflect.ValueOf(mf).Pointer()).Name())
-	mf(utils.ModuleData{&cmd, &tok, &admUsers, &authEnabled, &online, &lastLine, &cliOutput, &needResult, &db, &b, &execCmd, &stdin, &stdout, &targetChat, &wg})
+	mf(utils.ModuleData{
+		Cmd: &cmd, Tok: &tok, AdmUsers: &admUsers,
+		AuthEnabled: &authEnabled, Online: &online,
+		CliOutput: &cliOutput, NeedResult: &needResult,
+		Db: &db, Bot: &b, ExecCmd: &execCmd, Stdin: &stdin,
+		Stdout: &stdout, TargetChat: &targetChat, Wg: &wg})
 }
 
 func main() {

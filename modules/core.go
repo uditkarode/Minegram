@@ -17,6 +17,10 @@ import (
 	"gorm.io/gorm"
 )
 
+// Core module
+// Sets up necessary variables
+// for further functioning of the
+// wrapper
 func Core(data utils.ModuleData) {
 	fmt.Println("Initialising Minegram...")
 	(*data.Wg).Add(1)

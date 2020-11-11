@@ -8,6 +8,11 @@ import (
 	"github.com/fatih/color"
 )
 
+// Logger module
+// Sets up the logger
+// which formats and logs
+// output from the server to
+// os stdout
 func Logger(data utils.ModuleData) {
 	go func() {
 		for {

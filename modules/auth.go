@@ -8,6 +8,10 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
+// Auth module
+// Sets up Telegram handles
+// for commands related to
+// authentication
 func Auth(data utils.ModuleData) {
 	(*data.Bot).Handle("/link", func(m *tb.Message) {
 		if !*data.AuthEnabled {
