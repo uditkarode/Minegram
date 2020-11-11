@@ -39,7 +39,6 @@ type ModuleData struct {
 	AdmUsers    *[]string
 	AuthEnabled *bool
 	Online      *[]OnlinePlayer
-	LastLine    *string
 	CliOutput   *(chan string)
 	NeedResult  *bool
 	Db          **gorm.DB

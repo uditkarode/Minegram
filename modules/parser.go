@@ -32,11 +32,10 @@ func Parser(data utils.ModuleData) {
 		defer (*data.Wg).Done()
 		for scanner.Scan() {
 			m := scanner.Text()
-			*data.LastLine = m
 			logFeed <- m
 
 			if *data.NeedResult {
-				*data.CliOutput <- *data.LastLine
+				*data.CliOutput <- m
 				*data.NeedResult = false
 			} else {
 				go func() {
