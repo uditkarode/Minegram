@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"os/signal"
 	"strings"
 	"syscall"
 	"time"
@@ -108,4 +109,17 @@ func Core(data utils.ModuleData) {
 	if err != nil {
 		panic(err)
 	}
+
+	go (*data.Bot).Start()
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for range c {
+			fmt.Println("\n********************\nRunning cleanup! Please wait...\n********************")
+			_, _ = io.WriteString(*data.Stdin, "stop\n")
+			_ = (*data.ExecCmd).Wait()
+			os.Exit(0)
+		}
+	}()
 }

@@ -4,9 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"os"
 	"os/exec"
-	"os/signal"
 	"reflect"
 	"runtime"
 	"strings"
@@ -42,105 +40,12 @@ var targetChat tb.Recipient
 /* shared error */
 var err error
 
-func plugModule(mf utils.ModuleFunction) {
-	color.Blue("LOADING MODULE: " + runtime.FuncForPC(reflect.ValueOf(mf).Pointer()).Name())
-	mf(utils.ModuleData{&cmd, &tok, &admUsers, &authEnabled, &online, &lastLine, &cliOutput, &needResult, &db, &b, &execCmd, &stdin, &stdout, &targetChat})
-}
-
 func main() {
 	plugModule(modules.Core)
 	plugModule(modules.TgUtilCommands)
+	plugModule(modules.Tgtomc)
 
 	setupAuthCommands(b, db, stdin)
-
-	b.Handle(tb.OnText, func(m *tb.Message) {
-		if len(online) > 0 {
-			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
-			content := strings.ReplaceAll(m.Text, "\n", "(nl)")
-
-			if m.IsReply() {
-				if m.ReplyTo.Text == "" {
-					m.ReplyTo.Text = "[unsupported]"
-				}
-				_, err = io.WriteString(stdin, "tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\""+m.ReplyTo.Text+"\"}},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
-			} else {
-				_, err = io.WriteString(stdin, "tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"white\"}]\n")
-			}
-		}
-	})
-
-	b.Handle(tb.OnSticker, func(m *tb.Message) {
-		if len(online) > 0 {
-			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
-			content := "[STICKER]"
-			if m.IsReply() {
-				if m.ReplyTo.Text == "" {
-					m.ReplyTo.Text = "[unsupported]"
-				}
-				_, err = io.WriteString(stdin, "tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\""+m.ReplyTo.Text+"\"}},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
-			} else {
-				_, err = io.WriteString(stdin, "tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"yellow\"}]\n")
-			}
-		}
-	})
-
-	b.Handle(tb.OnPhoto, func(m *tb.Message) {
-		if len(online) > 0 {
-			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
-			content := "[PHOTO]"
-			if m.IsReply() {
-				if m.ReplyTo.Text == "" {
-					m.ReplyTo.Text = "[unsupported]"
-				}
-				_, err = io.WriteString(stdin, "tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\""+m.ReplyTo.Text+"\"}},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
-			} else {
-				_, err = io.WriteString(stdin, "tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"yellow\"}]\n")
-			}
-		}
-	})
-
-	b.Handle(tb.OnVideo, func(m *tb.Message) {
-		if len(online) > 0 {
-			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
-			content := "[VIDEO]"
-			if m.IsReply() {
-				if m.ReplyTo.Text == "" {
-					m.ReplyTo.Text = "[unsupported]"
-				}
-				_, err = io.WriteString(stdin, "tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\""+m.ReplyTo.Text+"\"}},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
-			} else {
-				_, err = io.WriteString(stdin, "tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"yellow\"}]\n")
-			}
-		}
-	})
-
-	b.Handle(tb.OnVoice, func(m *tb.Message) {
-		if len(online) > 0 {
-			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
-			content := "[VOICE]"
-			if m.IsReply() {
-				if m.ReplyTo.Text == "" {
-					m.ReplyTo.Text = "[unsupported]"
-				}
-				_, err = io.WriteString(stdin, "tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": \"},{\"text\":\"(\",\"color\":\"yellow\"},{\"text\":\"reply\",\"bold\":true,\"color\":\"yellow\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\""+m.ReplyTo.Text+"\"}},{\"text\":\")\",\"color\":\"yellow\"},{\"text\":\" "+content+"\"}]\n")
-			} else {
-				_, err = io.WriteString(stdin, "tellraw @a [\"\",{\"text\":\"[TG] "+sender+"\",\"color\":\"aqua\"},{\"text\":\": "+content+"\",\"color\":\"yellow\"}]\n")
-			}
-		}
-	})
-
-	go b.Start()
-
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	go func() {
-		for range c {
-			fmt.Println("\n********************\nRunning cleanup! Please wait...\n********************")
-			_, _ = io.WriteString(stdin, "stop\n")
-			_ = execCmd.Wait()
-			os.Exit(0)
-		}
-	}()
 
 	scanner := bufio.NewScanner(stdout)
 	for scanner.Scan() {
@@ -280,4 +185,9 @@ func main() {
 			}()
 		}
 	}
+}
+
+func plugModule(mf utils.ModuleFunction) {
+	color.Blue("LOADING MODULE: " + runtime.FuncForPC(reflect.ValueOf(mf).Pointer()).Name())
+	mf(utils.ModuleData{&cmd, &tok, &admUsers, &authEnabled, &online, &lastLine, &cliOutput, &needResult, &db, &b, &execCmd, &stdin, &stdout, &targetChat})
 }
