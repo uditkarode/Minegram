@@ -8,7 +8,7 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-func Tgtomc(data utils.ModuleData) {
+func TgToMc(data utils.ModuleData) {
 	(*data.Bot).Handle(tb.OnText, func(m *tb.Message) {
 		if len(*data.Online) > 0 {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")

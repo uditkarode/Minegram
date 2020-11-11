@@ -1,14 +1,10 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
 	"io"
 	"os/exec"
 	"reflect"
 	"runtime"
-	"strings"
-	"time"
 
 	"Minegram/modules"
 	"Minegram/utils"
@@ -40,154 +36,16 @@ var targetChat tb.Recipient
 /* shared error */
 var err error
 
-func main() {
-	plugModule(modules.Core)
-	plugModule(modules.TgUtilCommands)
-	plugModule(modules.Tgtomc)
-
-	setupAuthCommands(b, db, stdin)
-
-	scanner := bufio.NewScanner(stdout)
-	for scanner.Scan() {
-		lastLine = scanner.Text()
-
-		if strings.Contains(lastLine, "INFO") {
-			if genericOutputRegex.MatchString(lastLine) {
-				toLog := genericOutputRegex.FindStringSubmatch(lastLine)
-				if len(toLog) == 4 {
-					color.Set(color.FgYellow)
-					fmt.Print(toLog[1] + " ")
-					color.Unset()
-
-					color.Set(color.FgGreen)
-					fmt.Print(toLog[2] + ": " + toLog[3])
-					color.Unset()
-
-					fmt.Print("\n")
-				} else {
-					fmt.Println(lastLine)
-				}
-			} else {
-				fmt.Println(lastLine)
-			}
-		} else if strings.Contains(lastLine, "WARN") {
-			if genericOutputRegex.MatchString(lastLine) {
-				toLog := genericOutputRegex.FindStringSubmatch(lastLine)
-				if len(toLog) == 4 {
-					color.Set(color.FgYellow)
-					fmt.Print(toLog[1] + " ")
-					color.Unset()
-
-					color.Set(color.FgRed)
-					fmt.Print(toLog[2] + ": " + toLog[3])
-					color.Unset()
-
-					fmt.Print("\n")
-				} else {
-					fmt.Println(lastLine)
-				}
-			} else {
-				fmt.Println(lastLine)
-			}
-		} else {
-			fmt.Println(lastLine)
-		}
-
-		if needResult {
-			cliOutput <- lastLine
-			needResult = false
-		} else {
-			go func() {
-				if strings.Contains(lastLine, "INFO") {
-					if chatRegex.MatchString(lastLine) {
-						result := chatRegex.FindStringSubmatch(lastLine)
-						if len(result) == 3 {
-							_, _ = b.Send(targetChat, "`"+result[1]+"`"+"**:** "+result[2], "Markdown")
-						}
-					} else if joinRegex.MatchString(lastLine) || joinRegexSpigotPaper.MatchString(lastLine) {
-						result := joinRegex.FindStringSubmatch(lastLine)
-						if len(result) == 2 {
-							user := result[1]
-							if !utils.ContainsPlayer(online, user) {
-								newPlayer := utils.OnlinePlayer{InGameName: user, IsAuthd: false}
-								online = append(online, newPlayer)
-								toSend := "`" + user + "`" + " joined the server."
-								if authEnabled {
-									toSend += "\nUse /auth to authenticate."
-								}
-								_, _ = b.Send(targetChat, toSend, "Markdown")
-								if authEnabled {
-									var currentUser utils.Player
-									db.First(&currentUser, "mc_ign = ?", user)
-
-									startCoords := utils.CliExec(stdin, "data get entity "+user+" Pos", &needResult, cliOutput)
-									coords := entityPosRegex.FindStringSubmatch(startCoords)
-
-									dimensionStr := utils.CliExec(stdin, "data get entity "+user+" Dimension", &needResult, cliOutput)
-									dimension := dimensionRegex.FindStringSubmatch(dimensionStr)
-
-									gameTypeStr := utils.CliExec(stdin, "data get entity "+user+" playerGameType", &needResult, cliOutput)
-									rGameType := gameTypeRegex.FindStringSubmatch(gameTypeStr)
-
-									gameType := utils.GetGameType(rGameType[1])
-
-									db.Model(&currentUser).Update("last_game_mode", gameType)
-									db.Model(&currentUser).Update("did_user_auth", false)
-
-									_, _ = io.WriteString(stdin, "effect give "+user+" minecraft:blindness 999999\n")
-									_, _ = io.WriteString(stdin, "gamemode spectator "+user+"\n")
-									_, _ = io.WriteString(stdin, "tellraw "+user+" [\"\",{\"text\":\"If you haven't linked before, send \"},{\"text\":\"/link "+newPlayer.InGameName+" \",\"color\":\"green\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"},{\"text\":\"\\nIf you have \"},{\"text\":\"linked \",\"color\":\"green\"},{\"text\":\"your account, send \"},{\"text\":\"/auth \",\"color\":\"aqua\"},{\"text\":\"to \"},{\"text\":\"@"+b.Me.Username+"\",\"color\":\"yellow\"}]\n")
-
-									if len(coords) == 4 {
-										if len(dimension) == 2 {
-											for {
-												player := utils.GetOnlinePlayer(user, online)
-												if player.IsAuthd || player.InGameName == "" {
-													break
-												} else {
-													command := "execute in " + dimension[1] + " run tp " + user + " " + coords[1] + " " + coords[2] + " " + coords[3] + "\n"
-													_, _ = io.WriteString(stdin, command)
-													time.Sleep(400 * time.Millisecond)
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					} else if leaveRegex.MatchString(lastLine) {
-						result := leaveRegex.FindStringSubmatch(lastLine)
-						if len(result) == 2 {
-							online = utils.RemovePlayer(online, result[1])
-							_, _ = b.Send(targetChat, "`"+result[1]+"`"+" has left the server.", "Markdown")
-						}
-					} else if advancementRegex.MatchString(lastLine) {
-						result := advancementRegex.FindStringSubmatch(lastLine)
-						if len(result) == 3 {
-							_, _ = b.Send(targetChat, "`"+result[1]+"`"+" has made the advancement `"+result[2]+"`.", "Markdown")
-						}
-					} else if deathRegex.MatchString(lastLine) {
-						result := simpleOutputRegex.FindStringSubmatch(lastLine)
-						if len(result) == 2 {
-							sep := strings.Split(result[1], " ")
-							startCoords := utils.CliExec(stdin, "data get entity "+sep[0]+" Pos", &needResult, cliOutput)
-							coords := simplifiedEPRegex.FindStringSubmatch(startCoords)
-							toSend := "`" + sep[0] + "` " + strings.Join(sep[1:], " ")
-							if len(coords) == 4 {
-								toSend += " at (`" + coords[1] + " " + coords[2] + " " + coords[3] + "`)"
-							}
-							_, _ = b.Send(targetChat, toSend+".", "Markdown")
-						}
-					} else if strings.Contains(lastLine, "For help, type") {
-						utils.CliExec(stdin, "say Server initialised!", &needResult, cliOutput)
-					}
-				}
-			}()
-		}
-	}
-}
-
 func plugModule(mf utils.ModuleFunction) {
 	color.Blue("LOADING MODULE: " + runtime.FuncForPC(reflect.ValueOf(mf).Pointer()).Name())
 	mf(utils.ModuleData{&cmd, &tok, &admUsers, &authEnabled, &online, &lastLine, &cliOutput, &needResult, &db, &b, &execCmd, &stdin, &stdout, &targetChat})
+}
+
+func main() {
+	plugModule(modules.Core)
+	plugModule(modules.TgUtilCommands)
+	plugModule(modules.TgToMc)
+	setupAuthCommands(b, db, stdin)
+	plugModule(modules.Actor)
+	plugModule(modules.McReader)
 }
