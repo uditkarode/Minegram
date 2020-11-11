@@ -3,6 +3,7 @@ package utils
 import (
 	"io"
 	"os/exec"
+	"sync"
 
 	tb "gopkg.in/tucnak/telebot.v2"
 	"gorm.io/gorm"
@@ -47,4 +48,5 @@ type ModuleData struct {
 	Stdin       *io.WriteCloser
 	Stdout      *io.ReadCloser
 	TargetChat  *tb.Recipient
+	Wg          *sync.WaitGroup
 }

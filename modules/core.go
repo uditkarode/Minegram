@@ -19,6 +19,7 @@ import (
 
 func Core(data utils.ModuleData) {
 	fmt.Println("Initialising Minegram...")
+	(*data.Wg).Add(1)
 	res := utils.ReadConfig("config.ini")
 
 	*data.Db, err = gorm.Open(sqlite.Open("minegram.db"), &gorm.Config{})
@@ -102,15 +103,6 @@ func Core(data utils.ModuleData) {
 			_, err = io.WriteString(*data.Stdin, scanner.Text()+"\n")
 		}
 	}()
-
-	fmt.Println("Executing '" + *data.Cmd + "'...")
-	err = (*data.ExecCmd).Start()
-
-	if err != nil {
-		panic(err)
-	}
-
-	go (*data.Bot).Start()
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)

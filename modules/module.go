@@ -1,8 +1,12 @@
 package modules
 
-import "regexp"
+import (
+	"regexp"
+)
 
 type eventKind string
+
+var listenerCount = 0
 
 const (
 	eventLog         eventKind = "EVENT_LOG"
@@ -20,12 +24,32 @@ type consoleEvent struct {
 
 var err error
 var feed = make(chan consoleEvent)
+var logFeed = make(chan string)
+
+func emit(k eventKind, str string) {
+	if k == eventLog {
+		logFeed <- str
+	} else {
+		for i := 0; i < listenerCount; i++ {
+			feed <- consoleEvent{line: str, kind: k}
+		}
+	}
+}
+
+func listenLog(action func(string)) {
+	for {
+		action(<-logFeed)
+	}
+}
 
 /* ALWAYS use this in a separate goroutine! */
-func listen(k eventKind, action func()) {
-	event := <-feed
-	if event.kind == k {
-		action()
+func listen(k eventKind, action func(str string)) {
+	listenerCount++
+	for {
+		event := <-feed
+		if event.kind == k {
+			action(event.line)
+		}
 	}
 }
 
