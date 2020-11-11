@@ -1,12 +1,13 @@
-package main
+package utils
 
 import (
 	"fmt"
-	"gopkg.in/ini.v1"
 	"os"
+
+	"gopkg.in/ini.v1"
 )
 
-func readConfig(fileName string) map[string]string {
+func ReadConfig(fileName string) map[string]string {
 	cfg, err := ini.Load(fileName)
 	if err != nil {
 		fmt.Printf("Fail to read file: %v", err)
@@ -14,7 +15,7 @@ func readConfig(fileName string) map[string]string {
 	}
 	res := make(map[string]string)
 	keys := cfg.Section("").KeyStrings()
-	for _, j := range keys{
+	for _, j := range keys {
 		res[j] = cfg.Section("").Key(j).String()
 	}
 	return res
