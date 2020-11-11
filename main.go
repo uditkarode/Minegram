@@ -49,7 +49,6 @@ func main() {
 	plugModule(modules.TgUtilCommands)
 	plugModule(modules.TgToMc)
 	setupAuthCommands(b, db, stdin)
-	plugModule(modules.Actor)
 	plugModule(modules.Logger)
 	plugModule(modules.Init)
 }
