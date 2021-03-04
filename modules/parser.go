@@ -73,7 +73,10 @@ func Parser(data utils.ModuleData) {
 										gameTypeStr := utils.CliExec(*data.Stdin, "data get entity "+user+" playerGameType", data.NeedResult, *data.CliOutput)
 										rGameType := gameTypeRegex.FindStringSubmatch(gameTypeStr)
 
-										gameType := utils.GetGameType(rGameType[1])
+										gameType := "survival"
+										if len(rGameType) > 0 {
+											gameType = utils.GetGameType(rGameType[1])	
+										}
 
 										(*data.Db).Model(&currentUser).Update("last_game_mode", gameType)
 										(*data.Db).Model(&currentUser).Update("did_user_auth", false)
