@@ -13,8 +13,8 @@ import (
 // to Minecraft with support
 // for replies.
 func TgToMc(data utils.ModuleData) {
-	(*data.Bot).Handle(tb.OnText, func(m *tb.Message) {
-		if len(*data.Online) > 0 {
+	(*data.TeleBot).Handle(tb.OnText, func(m *tb.Message) {
+		if len(*data.OnlinePlayers) > 0 {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := strings.ReplaceAll(m.Text, "\n", "(nl)")
 
@@ -29,8 +29,8 @@ func TgToMc(data utils.ModuleData) {
 		}
 	})
 
-	(*data.Bot).Handle(tb.OnSticker, func(m *tb.Message) {
-		if len(*data.Online) > 0 {
+	(*data.TeleBot).Handle(tb.OnSticker, func(m *tb.Message) {
+		if len(*data.OnlinePlayers) > 0 {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := "[STICKER]"
 			if m.IsReply() {
@@ -44,8 +44,8 @@ func TgToMc(data utils.ModuleData) {
 		}
 	})
 
-	(*data.Bot).Handle(tb.OnPhoto, func(m *tb.Message) {
-		if len(*data.Online) > 0 {
+	(*data.TeleBot).Handle(tb.OnPhoto, func(m *tb.Message) {
+		if len(*data.OnlinePlayers) > 0 {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := "[PHOTO]"
 			if m.IsReply() {
@@ -59,8 +59,8 @@ func TgToMc(data utils.ModuleData) {
 		}
 	})
 
-	(*data.Bot).Handle(tb.OnVideo, func(m *tb.Message) {
-		if len(*data.Online) > 0 {
+	(*data.TeleBot).Handle(tb.OnVideo, func(m *tb.Message) {
+		if len(*data.OnlinePlayers) > 0 {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := "[VIDEO]"
 			if m.IsReply() {
@@ -74,8 +74,8 @@ func TgToMc(data utils.ModuleData) {
 		}
 	})
 
-	(*data.Bot).Handle(tb.OnVoice, func(m *tb.Message) {
-		if len(*data.Online) > 0 {
+	(*data.TeleBot).Handle(tb.OnVoice, func(m *tb.Message) {
+		if len(*data.OnlinePlayers) > 0 {
 			sender := strings.ReplaceAll(m.Sender.FirstName+" "+m.Sender.LastName, "\n", "(nl)")
 			content := "[VOICE]"
 			if m.IsReply() {

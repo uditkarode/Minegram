@@ -34,18 +34,18 @@ func (g Group) Recipient() string {
 }
 
 type ModuleData struct {
-	Cmd         *string
-	Tok         *string
-	AdmUsers    *[]string
-	AuthEnabled *bool
-	Online      *[]OnlinePlayer
-	CliOutput   *(chan string)
-	NeedResult  *bool
-	Db          **gorm.DB
-	Bot         **tb.Bot
-	ExecCmd     **exec.Cmd
-	Stdin       *io.WriteCloser
-	Stdout      *io.ReadCloser
-	TargetChat  *tb.Recipient
-	Wg          *sync.WaitGroup
+	CmdToRun      *string
+	TgBotToken    *string
+	AdminUsers    *[]string
+	IsAuthEnabled *bool
+	OnlinePlayers *[]OnlinePlayer
+	ConsoleOut    *(chan string)
+	NeedResult    *bool
+	GormDb        **gorm.DB
+	TeleBot       **tb.Bot
+	ExecCmd       **exec.Cmd
+	Stdin         *io.WriteCloser
+	Stdout        *io.ReadCloser
+	TargetChat    *tb.Recipient
+	Waitgroup     *sync.WaitGroup
 }

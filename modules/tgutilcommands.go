@@ -13,8 +13,8 @@ import (
 // commands that can be used
 // from Telegram as /command
 func TgUtilCommands(data utils.ModuleData) {
-	(*data.Bot).Handle("/list", func(m *tb.Message) {
-		onlen := len(*data.Online)
+	(*data.TeleBot).Handle("/list", func(m *tb.Message) {
+		onlen := len(*data.OnlinePlayers)
 		res := "`" + strconv.Itoa(onlen)
 		if onlen == 1 {
 			res = res + "` player online\n"
@@ -22,27 +22,27 @@ func TgUtilCommands(data utils.ModuleData) {
 			res = res + "` players online\n"
 		}
 
-		for _, player := range *data.Online {
+		for _, player := range *data.OnlinePlayers {
 			res += "\n- `" + player.InGameName + "`"
 		}
-		_, _ = (*data.Bot).Send(*data.TargetChat, res, "Markdown")
+		_, _ = (*data.TeleBot).Send(*data.TargetChat, res, "Markdown")
 	})
 
-	(*data.Bot).Handle("/cli", func(m *tb.Message) {
-		if utils.Contains(*data.AdmUsers, m.Sender.Username) {
+	(*data.TeleBot).Handle("/cli", func(m *tb.Message) {
+		if utils.Contains(*data.AdminUsers, m.Sender.Username) {
 			if m.Payload == "" {
-				_, _ = (*data.Bot).Reply(m, "Enter a command to execute!")
+				_, _ = (*data.TeleBot).Reply(m, "Enter a command to execute!")
 			} else {
-				output := utils.CliExec(*data.Stdin, m.Payload, data.NeedResult, *data.CliOutput)
-				_, _ = (*data.Bot).Reply(m, "`"+output+"`", "Markdown")
+				output := utils.CliExec(*data.Stdin, m.Payload, data.NeedResult, *data.ConsoleOut)
+				_, _ = (*data.TeleBot).Reply(m, "`"+output+"`", "Markdown")
 			}
 		} else {
-			_, _ = (*data.Bot).Reply(m, "You are not authorised to use this command!")
+			_, _ = (*data.TeleBot).Reply(m, "You are not authorised to use this command!")
 		}
 	})
 
-	(*data.Bot).Handle("/time", func(m *tb.Message) {
-		output := utils.CliExec(*data.Stdin, "time query daytime", data.NeedResult, *data.CliOutput)
+	(*data.TeleBot).Handle("/time", func(m *tb.Message) {
+		output := utils.CliExec(*data.Stdin, "time query daytime", data.NeedResult, *data.ConsoleOut)
 		result := timeRegex.FindStringSubmatch(output)
 		if len(result) == 2 {
 			var tick int
@@ -93,7 +93,7 @@ func TgUtilCommands(data utils.ModuleData) {
 				}
 
 				timeStr += "\n<b>Ticks</b>: <code>" + utils.Its(tick) + "</code>"
-				_, err = (*data.Bot).Send(*data.TargetChat, timeStr, "HTML")
+				_, err = (*data.TeleBot).Send(*data.TargetChat, timeStr, "HTML")
 				if err != nil {
 					fmt.Println(err)
 				}

@@ -23,29 +23,29 @@ import (
 // wrapper
 func Core(data utils.ModuleData) {
 	fmt.Println("Initialising Minegram...")
-	(*data.Wg).Add(1)
+	(*data.Waitgroup).Add(1)
 	res := utils.ReadConfig("config.ini")
 
-	*data.Db, err = gorm.Open(sqlite.Open("minegram.db"), &gorm.Config{})
+	*data.GormDb, err = gorm.Open(sqlite.Open("minegram.db"), &gorm.Config{})
 
 	if err != nil {
 		panic("failed to connect database")
 	}
 
-	_ = (*data.Db).AutoMigrate(&utils.Player{})
+	_ = (*data.GormDb).AutoMigrate(&utils.Player{})
 
-	*data.Cmd = res["command"]
-	*data.Tok = res["bot_token"]
+	*data.CmdToRun = res["command"]
+	*data.TgBotToken = res["bot_token"]
 	tchat := res["target_chat"]
 	admUsersRaw := res["admin_usernames"]
 	authEnabledRaw := res["auth_enabled"]
 
-	if *data.Cmd == "" {
+	if *data.CmdToRun == "" {
 		fmt.Println("Please enter a 'command' in the config!")
 		os.Exit(0)
 	}
 
-	if *data.Tok == "" {
+	if *data.TgBotToken == "" {
 		fmt.Println("Please enter a 'bot_token' in the config!")
 		os.Exit(0)
 	}
@@ -66,15 +66,15 @@ func Core(data utils.ModuleData) {
 	}
 
 	if authEnabledRaw != "true" {
-		*data.AuthEnabled = false
+		*data.IsAuthEnabled = false
 	}
 
-	*data.AdmUsers = strings.Split(admUsersRaw, ",")
+	*data.AdminUsers = strings.Split(admUsersRaw, ",")
 
 	*data.TargetChat = utils.Group{Id: tchat}
 
-	*data.Bot, err = tb.NewBot(tb.Settings{
-		Token:  *data.Tok,
+	*data.TeleBot, err = tb.NewBot(tb.Settings{
+		Token:  *data.TgBotToken,
 		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
 	})
 
@@ -82,7 +82,7 @@ func Core(data utils.ModuleData) {
 		panic(err)
 	}
 
-	splitCmd := strings.Split(*data.Cmd, " ")
+	splitCmd := strings.Split(*data.CmdToRun, " ")
 	*data.ExecCmd = exec.Command(splitCmd[0], splitCmd[1:]...)
 
 	(*data.ExecCmd).Stderr = os.Stderr

@@ -37,14 +37,14 @@ var wg sync.WaitGroup
 /* shared error */
 var err error
 
-func plugModule(mf utils.ModuleFunction) {
-	color.Blue("LOADING MODULE: " + runtime.FuncForPC(reflect.ValueOf(mf).Pointer()).Name())
-	mf(utils.ModuleData{
-		Cmd: &cmd, Tok: &tok, AdmUsers: &admUsers,
-		AuthEnabled: &authEnabled, Online: &online,
-		CliOutput: &cliOutput, NeedResult: &needResult,
-		Db: &db, Bot: &b, ExecCmd: &execCmd, Stdin: &stdin,
-		Stdout: &stdout, TargetChat: &targetChat, Wg: &wg})
+func plugModule(module utils.ModuleFunction) {
+	color.Blue("LOADING MODULE: " + runtime.FuncForPC(reflect.ValueOf(module).Pointer()).Name())
+	module(utils.ModuleData{
+		CmdToRun: &cmd, TgBotToken: &tok, AdminUsers: &admUsers,
+		IsAuthEnabled: &authEnabled, OnlinePlayers: &online,
+		ConsoleOut: &cliOutput, NeedResult: &needResult,
+		GormDb: &db, TeleBot: &b, ExecCmd: &execCmd, Stdin: &stdin,
+		Stdout: &stdout, TargetChat: &targetChat, Waitgroup: &wg})
 }
 
 func main() {

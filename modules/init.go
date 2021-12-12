@@ -10,14 +10,14 @@ import (
 // command, assuming that all necessary
 // listeners and variables are set
 func Init(data utils.ModuleData) {
-	fmt.Println("Executing '" + *data.Cmd + "'...")
+	fmt.Println("Executing '" + *data.CmdToRun + "'...")
 	err = (*data.ExecCmd).Start()
 
 	if err != nil {
 		panic(err)
 	}
 
-	go (*data.Bot).Start()
+	go (*data.TeleBot).Start()
 
-	(*data.Wg).Wait()
+	(*data.Waitgroup).Wait()
 }
