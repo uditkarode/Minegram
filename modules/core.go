@@ -29,7 +29,7 @@ func Core(data utils.ModuleData) {
 	*data.GormDb, err = gorm.Open(sqlite.Open("minegram.db"), &gorm.Config{})
 
 	if err != nil {
-		panic("failed to connect database")
+		panic("failed to connect to database")
 	}
 
 	_ = (*data.GormDb).AutoMigrate(&utils.Player{})

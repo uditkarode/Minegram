@@ -10,7 +10,7 @@ import (
 func ReadConfig(fileName string) map[string]string {
 	cfg, err := ini.Load(fileName)
 	if err != nil {
-		fmt.Printf("Fail to read file: %v", err)
+		fmt.Printf("Failed to read config file: %v", err)
 		os.Exit(1)
 	}
 	res := make(map[string]string)

@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var chatRegex = regexp.MustCompile(`: <(.+)> (.+)`)
+var chatRegex = regexp.MustCompile(`(?:\[Not Secure\] )?<(.+)> (.+)`)
 var joinRegex = regexp.MustCompile(`: (.+) joined the game`)
 var joinRegexSpigotPaper = regexp.MustCompile(`: UUID of player (.+) is .*`)
 var leaveRegex = regexp.MustCompile(`: (.+) left the game`)
