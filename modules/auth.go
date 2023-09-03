@@ -50,7 +50,7 @@ func Auth(data utils.ModuleData) {
 					}
 				} else {
 					(*data.GormDb).Create(&utils.Player{McIgn: ign, TgUsn: m.Sender.Username, LastGameMode: "survival", DidUserAuth: false})
-					(*data.TeleBot).Reply(m, "The Minecraft IGN `"+ign+"` has been successfully linked to the telegram account `@"+m.Sender.Username+"`!", "Markdown")
+					(*data.TeleBot).Reply(m, "The Minecraft IGN `"+ign+"` has been successfully linked to the Telegram account `@"+m.Sender.Username+"`!", "Markdown")
 				}
 			}
 		}
