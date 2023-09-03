@@ -54,7 +54,6 @@ func TgUtilCommands(data utils.ModuleData) {
 
 				if secondsPassed > 60 {
 					minutesPassed = secondsPassed / 60
-					secondsPassed = secondsPassed % 60
 				}
 
 				if minutesPassed > 60 {
