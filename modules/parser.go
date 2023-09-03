@@ -33,6 +33,7 @@ func Parser(data utils.ModuleData) {
 	scanner := bufio.NewScanner(*data.Stdout)
 	go func() {
 		defer (*data.Waitgroup).Done()
+
 		for scanner.Scan() {
 			m := scanner.Text()
 			logFeed <- m
@@ -50,19 +51,25 @@ func Parser(data utils.ModuleData) {
 							}
 						} else if joinRegex.MatchString(m) || joinRegexSpigotPaper.MatchString(m) {
 							result := joinRegex.FindStringSubmatch(m)
+
 							if len(result) == 2 {
 								user := result[1]
 								if !utils.ContainsPlayer(*data.OnlinePlayers, user) {
 									newPlayer := utils.OnlinePlayer{InGameName: user, IsAuthd: false}
 									*data.OnlinePlayers = append(*data.OnlinePlayers, newPlayer)
 									toSend := "`" + user + "`" + " joined the server."
-									if *data.IsAuthEnabled {
+
+									if *data.AuthType == utils.AuthTypeEnabled {
 										toSend += "\nUse /auth to authenticate."
 									}
-									_, _ = (*data.TeleBot).Send(*data.TargetChat, toSend, "Markdown")
-									if *data.IsAuthEnabled {
-										var currentUser utils.Player
-										(*data.GormDb).First(&currentUser, "mc_ign = ?", user)
+
+									if *data.AuthType == utils.AuthTypeDisabled {
+										_, _ = (*data.TeleBot).Send(*data.TargetChat, toSend, "Markdown")
+									}
+
+									if *data.AuthType != utils.AuthTypeDisabled {
+										var currentUser *utils.Player
+										(*data.GormDb).First(currentUser, "mc_ign = ?", user)
 
 										startCoords := utils.CliExec(*data.Stdin, "data get entity "+user+" Pos", data.NeedResult, *data.ConsoleOut)
 										coords := entityPosRegex.FindStringSubmatch(startCoords)
@@ -78,23 +85,38 @@ func Parser(data utils.ModuleData) {
 											gameType = utils.GetGameType(rGameType[1])
 										}
 
-										(*data.GormDb).Model(&currentUser).Update("last_game_mode", gameType)
-										(*data.GormDb).Model(&currentUser).Update("did_user_auth", false)
+										if currentUser != nil {
+											(*data.GormDb).Model(currentUser).Update("last_game_mode", gameType)
 
-										_, _ = io.WriteString(*data.Stdin, "effect give "+user+" minecraft:blindness 999999\n")
-										_, _ = io.WriteString(*data.Stdin, "gamemode spectator "+user+"\n")
-										_, _ = io.WriteString(*data.Stdin, "tellraw "+user+" [\"\",{\"text\":\"If you haven't linked before, send \"},{\"text\":\"/link "+newPlayer.InGameName+" \",\"color\":\"green\"},{\"text\":\"to \"},{\"text\":\"@"+(*data.TeleBot).Me.Username+"\",\"color\":\"yellow\"},{\"text\":\"\\nIf you have \"},{\"text\":\"linked \",\"color\":\"green\"},{\"text\":\"your account, send \"},{\"text\":\"/auth \",\"color\":\"aqua\"},{\"text\":\"to \"},{\"text\":\"@"+(*data.TeleBot).Me.Username+"\",\"color\":\"yellow\"}]\n")
+											if *data.AuthType == utils.AuthTypeEnabled {
+												(*data.GormDb).Model(currentUser).Update("did_user_auth", false)
+											}
+										}
 
-										if len(coords) == 4 {
-											if len(dimension) == 2 {
-												for {
-													player := utils.GetOnlinePlayer(user, *data.OnlinePlayers)
-													if player.IsAuthd || player.InGameName == "" {
-														break
-													} else {
-														command := "execute in " + dimension[1] + " run tp " + user + " " + coords[1] + " " + coords[2] + " " + coords[3] + "\n"
-														_, _ = io.WriteString(*data.Stdin, command)
-														time.Sleep(400 * time.Millisecond)
+										if currentUser == nil && *data.AuthType == utils.AuthTypeLinkOnly {
+											io.WriteString(*data.Stdin, "kick "+user)
+											toSend = "`" + user + "` tried to join, but was kicked due to not having linked before."
+											_, _ = (*data.TeleBot).Send(*data.TargetChat, toSend, "Markdown")
+										}
+
+										_, _ = (*data.TeleBot).Send(*data.TargetChat, toSend, "Markdown")
+
+										if *data.AuthType == utils.AuthTypeEnabled {
+											_, _ = io.WriteString(*data.Stdin, "effect give "+user+" minecraft:blindness 999999\n")
+											_, _ = io.WriteString(*data.Stdin, "gamemode spectator "+user+"\n")
+											_, _ = io.WriteString(*data.Stdin, "tellraw "+user+" [\"\",{\"text\":\"If you haven't linked before, send \"},{\"text\":\"/link "+newPlayer.InGameName+" \",\"color\":\"green\"},{\"text\":\"to \"},{\"text\":\"@"+(*data.TeleBot).Me.Username+"\",\"color\":\"yellow\"},{\"text\":\"\\nIf you have \"},{\"text\":\"linked \",\"color\":\"green\"},{\"text\":\"your account, send \"},{\"text\":\"/auth \",\"color\":\"aqua\"},{\"text\":\"to \"},{\"text\":\"@"+(*data.TeleBot).Me.Username+"\",\"color\":\"yellow\"}]\n")
+
+											if len(coords) == 4 {
+												if len(dimension) == 2 {
+													for {
+														player := utils.GetOnlinePlayer(user, *data.OnlinePlayers)
+														if player.IsAuthd || player.InGameName == "" {
+															break
+														} else {
+															command := "execute in " + dimension[1] + " run tp " + user + " " + coords[1] + " " + coords[2] + " " + coords[3] + "\n"
+															_, _ = io.WriteString(*data.Stdin, command)
+															time.Sleep(400 * time.Millisecond)
+														}
 													}
 												}
 											}

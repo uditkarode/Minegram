@@ -25,6 +25,13 @@ type OnlinePlayer struct {
 	IsAuthd     bool
 }
 
+type AuthType string
+const (
+	AuthTypeEnabled AuthType = "ENABLED"
+	AuthTypeDisabled AuthType = "DISABLED"
+	AuthTypeLinkOnly AuthType = "LINK_ONLY"
+)
+
 type Group struct {
 	Id string
 }
@@ -37,7 +44,7 @@ type ModuleData struct {
 	CmdToRun      *string
 	TgBotToken    *string
 	AdminUsers    *[]string
-	IsAuthEnabled *bool
+	AuthType *AuthType
 	OnlinePlayers *[]OnlinePlayer
 	ConsoleOut    *(chan string)
 	NeedResult    *bool

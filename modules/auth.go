@@ -14,7 +14,7 @@ import (
 // authentication
 func Auth(data utils.ModuleData) {
 	(*data.TeleBot).Handle("/link", func(m *tb.Message) {
-		if !*data.IsAuthEnabled {
+		if *data.AuthType == utils.AuthTypeDisabled {
 			(*data.TeleBot).Reply(m, "The `auth` module has been disabled.", "Markdown")
 			return
 		}
@@ -57,8 +57,8 @@ func Auth(data utils.ModuleData) {
 	})
 
 	(*data.TeleBot).Handle("/auth", func(m *tb.Message) {
-		if !*data.IsAuthEnabled {
-			(*data.TeleBot).Reply(m, "The `auth` module has been disabled.", "Markdown")
+		if *data.AuthType != utils.AuthTypeEnabled {
+			(*data.TeleBot).Reply(m, "The `auth` module has either been disabled or set to link-only mode.", "Markdown")
 			return
 		}
 

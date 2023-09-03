@@ -20,7 +20,7 @@ import (
 var cmd string
 var tok string
 var admUsers []string
-var authEnabled = true
+var authEnabled = utils.AuthTypeEnabled
 
 /* shared vars */
 var online = []utils.OnlinePlayer{}
@@ -34,14 +34,11 @@ var stdout io.ReadCloser
 var targetChat tb.Recipient
 var wg sync.WaitGroup
 
-/* shared error */
-var err error
-
 func plugModule(module utils.ModuleFunction) {
 	color.Blue("LOADING MODULE: " + runtime.FuncForPC(reflect.ValueOf(module).Pointer()).Name())
 	module(utils.ModuleData{
 		CmdToRun: &cmd, TgBotToken: &tok, AdminUsers: &admUsers,
-		IsAuthEnabled: &authEnabled, OnlinePlayers: &online,
+		AuthType: &authEnabled, OnlinePlayers: &online,
 		ConsoleOut: &cliOutput, NeedResult: &needResult,
 		GormDb: &db, TeleBot: &b, ExecCmd: &execCmd, Stdin: &stdin,
 		Stdout: &stdout, TargetChat: &targetChat, Waitgroup: &wg})
