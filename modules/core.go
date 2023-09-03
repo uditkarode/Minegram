@@ -67,11 +67,12 @@ func Core(data utils.ModuleData) {
 
 	if authEnabledRaw == "true" {
 		*data.AuthType = utils.AuthTypeEnabled
+	} else if authEnabledRaw == "link_only" {
+		*data.AuthType = utils.AuthTypeLinkOnly
+	} else {
+		*data.AuthType = utils.AuthTypeDisabled
 	}
 
-	if authEnabledRaw == "link_only" {
-		*data.AuthType = utils.AuthTypeLinkOnly
-	}
 
 	*data.AdminUsers = strings.Split(admUsersRaw, ",")
 

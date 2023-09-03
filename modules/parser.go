@@ -68,8 +68,15 @@ func Parser(data utils.ModuleData) {
 									}
 
 									if *data.AuthType != utils.AuthTypeDisabled {
-										var currentUser *utils.Player
-										(*data.GormDb).First(currentUser, "mc_ign = ?", user)
+										var currentUser utils.Player
+										(*data.GormDb).First(&currentUser, "mc_ign = ?", user)
+
+										if currentUser.McIgn == "" && *data.AuthType == utils.AuthTypeLinkOnly {
+											io.WriteString(*data.Stdin, "kick "+user+"\n")
+											toSend = "`" + user + "` tried to join, but was kicked due to not having linked before."
+											_, _ = (*data.TeleBot).Send(*data.TargetChat, toSend, "Markdown")
+											return
+										}
 
 										startCoords := utils.CliExec(*data.Stdin, "data get entity "+user+" Pos", data.NeedResult, *data.ConsoleOut)
 										coords := entityPosRegex.FindStringSubmatch(startCoords)
@@ -85,18 +92,12 @@ func Parser(data utils.ModuleData) {
 											gameType = utils.GetGameType(rGameType[1])
 										}
 
-										if currentUser != nil {
+										if currentUser.McIgn != "" {
 											(*data.GormDb).Model(currentUser).Update("last_game_mode", gameType)
 
 											if *data.AuthType == utils.AuthTypeEnabled {
 												(*data.GormDb).Model(currentUser).Update("did_user_auth", false)
 											}
-										}
-
-										if currentUser == nil && *data.AuthType == utils.AuthTypeLinkOnly {
-											io.WriteString(*data.Stdin, "kick "+user)
-											toSend = "`" + user + "` tried to join, but was kicked due to not having linked before."
-											_, _ = (*data.TeleBot).Send(*data.TargetChat, toSend, "Markdown")
 										}
 
 										_, _ = (*data.TeleBot).Send(*data.TargetChat, toSend, "Markdown")
