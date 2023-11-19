@@ -12,8 +12,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/glebarez/sqlite"
 	tb "gopkg.in/tucnak/telebot.v2"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -72,7 +72,6 @@ func Core(data utils.ModuleData) {
 	} else {
 		*data.AuthType = utils.AuthTypeDisabled
 	}
-
 
 	*data.AdminUsers = strings.Split(admUsersRaw, ",")
 
